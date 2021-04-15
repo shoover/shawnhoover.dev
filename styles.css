@@ -1,0 +1,42 @@
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('font/Lato-Regular.ttf');
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: #fffff8;
+    line-height: 1.5;
+}
+header {
+    margin: 2ch;
+}
+header h1 {
+    font-size: 1.2em;
+}
+section {
+    max-width: 70ch;
+    margin: 0 15ch;
+}
+h1 {
+    font-weight: 300;
+    margin-bottom: .5rem;
+}
+h2 {
+    font-weight: 400;
+    margin: 0.7em 0 0.2em 0;
+}
+p {
+    margin: 0 0 0.5em 1px;
+}
+a {
+    color: #000000;
+}
+@media only screen and (max-device-width: 667px) {
+    section {
+        margin: 0 4ch;
+    }
+}
