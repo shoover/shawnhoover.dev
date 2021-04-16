@@ -7,7 +7,7 @@ set -e
 TTL=604800
 
 # Sync all assets to S3. Display output and capture for CloudFront invalidation.
-aws s3 sync . s3://$S3_BUCKET/ \
+aws s3 sync site s3://$S3_BUCKET \
     --no-progress \
     --cache-control max-age=$TTL \
     --exclude "*" \
@@ -21,7 +21,7 @@ aws s3 sync . s3://$S3_BUCKET/ \
   | tee sync.log
 
 # Invalidate cache for synced assets
-sed -E -n "s/^upload: .\/(.+) to s3:\/\/$S3_BUCKET\/.*$/\1/p" sync.log \
+sed -E -n "s/^upload: site\/(.+) to s3:\/\/$S3_BUCKET\/.*$/\1/p" sync.log \
   | tee upload-matches.log \
   | xargs -I {} -t aws cloudfront create-invalidation --distribution-id $CF_DIST --paths /{}
 
