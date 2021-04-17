@@ -1,15 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: S3 Static site with CF and ACM
-
-Metadata:
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-      - Label:
-          default: Domain
-        Parameters:
-          - SubDomain
-          - DomainName
-          - HostedZoneId
+Description: Just a web site, hosted on CloudFront and S3
 
 Parameters:
   SubDomain:
@@ -47,6 +37,18 @@ Conditions:
     - !Condition CreateDnsConfig
     
 Resources:
+  S3BucketRoot:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !Ref 'S3BucketLogs'
+        LogFilePrefix: 'origin/'
+
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -166,49 +168,23 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
-  S3BucketRoot:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      LoggingConfiguration:
-        DestinationBucketName: !Ref 'S3BucketLogs'
-        LogFilePrefix: 'origin/'
-
 Outputs:
+  CloudFrontDomainName:
+    Description: Website address
+    Value: !Sub '${SubDomain}.${DomainName}'
   CloudFrontDistribution:
     Description: CloudFront distribution ID
     Value: !Ref CloudFrontDistribution
   CloudFrontDistributionDomain:
     Description: CloudFront distribution domain name
     Value: !GetAtt CloudFrontDistribution.DomainName
-  CloudFrontDomainName:
-    Description: Website address
-    Value: !Sub '${SubDomain}.${DomainName}'
   DNSRecord:
     Description: DNS record to create to point your site to CloudFront
     Value: !Sub '${SubDomain}.${DomainName} CNAME ${CloudFrontDistribution.DomainName}'
 
-  CertificateArn:
-    Description: Issued certificate 
-    Value: !Ref Certificate
-
   S3BucketRoot:
     Description: Website bucket
     Value: !Ref S3BucketRoot
-  S3BucketRootName:
-    Description: Website bucket name
-    Value: !GetAtt S3BucketRoot.DomainName
-  S3BucketRootArn:
-    Description: Website bucket locator
-    Value: !GetAtt S3BucketRoot.Arn
-
   S3BucketLogs:
     Description: Logging bucket
     Value: !Ref S3BucketLogs
-  S3BucketLogsName:
-    Description: Logging bucket Name
-    Value: !GetAtt S3BucketLogs.DomainName
