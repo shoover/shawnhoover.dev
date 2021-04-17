@@ -65,7 +65,7 @@ SUBDOMAIN=<your subdomain e.g. www>
 
 aws --region us-east-1 cloudformation deploy \
   --stack-name $STACK \
-  --template-file infra/template.yaml \
+  --template-file infra/static-site.yaml \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
   --parameter-overrides DomainName=$DOMAIN SubDomain=$SUBDOMAIN CreateApex=yes CreateDns=no
 
