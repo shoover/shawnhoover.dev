@@ -148,9 +148,11 @@ modes.
 To deploy a static site:
 
 1. Deploy from the Marketplace with parameter tweaks:
+   - Application name: customize it
    - Set `EnableSpa` to `false`
-   - Set the "other" domain name to your domain+subdomain
-   - Change HttpHeaders to add `font-src 'self'` if you will host font files
+   - HttpHeaders Content-Security-Policy: add `font-src 'self';` if you will host font files
+   - AlternateDomainNames: set to your domain, matching what you put
+     in the CloudFront distribution
 2. In the console, request a certificate via ACM and add your domain name to
    the CloudFront distribution.
 3. Upload your content to S3.
