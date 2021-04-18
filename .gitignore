@@ -1,2 +1,3 @@
 .envrc
+.env_deploy
 .env_secrets
