@@ -1,12 +1,16 @@
 #!/bin/bash
 
 set -e
+set -o pipefail
+set -x # debug
 
 [[ -z "$S3_BUCKET" ]] && { echo "S3_BUCKET is required" ; exit 1; }
 [[ -z "$CF_DIST" ]] && { echo "CF_DIST is required" ; exit 1; }
 
 # It's a static static site
 TTL=604800
+
+aws sts get-caller-identity
 
 # Sync content to S3. Display output and capture for CloudFront invalidation.
 aws s3 sync site s3://$S3_BUCKET \

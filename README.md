@@ -89,7 +89,7 @@ aws --region us-east-1 cloudformation deploy \
   --template-file infra/static-site.yaml \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
   --parameter-overrides DomainName=$DOMAIN SubDomain=$SUBDOMAIN CreateApex=yes CreateDns=no
-
+  
 # Deployment will block on certificate DNS validation. Go to the ACM
 # console to get the validation record details. Create the required
 # record at your DNS provider.
@@ -120,6 +120,27 @@ URL=https://`aws --region us-east-1 cloudformation describe-stacks \
   --stack-name $STACK \
   --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDomainName'].OutputValue" --output text`
 open $URL
+```
+
+## Configure GitHub Actions
+
+https://github.com/aws-actions/configure-aws-credentials#sample-iam-oidc-cloudformation-template
+
+1. Depoy stack below.
+2. Create a role linked to the OIDC provider.
+   1. Create a policy with write access to the bucket.
+
+To tweak the subject condition see [example subjects](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims).
+
+```sh
+GH_USER=shoover
+GH_REPO=$(basename `pwd`)
+
+aws --region us-east-1 cloudformation deploy \
+  --stack-name github-aws-credentials \
+  --template-file infra/configure-aws-credentials.yaml \
+  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+  --parameter-overrides GitHubOrg=$GH_USER RepositoryName=$GH_REPO
 ```
 
 ## Secure static site

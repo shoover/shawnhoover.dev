@@ -23,3 +23,14 @@ jobs:
     - name: Test AWS access
       run: |
         aws s3 ls s3://www-stage-s3bucketroot-15e64511z92nx/
+
+    - name: Configure Stage Deployment
+      run: |
+        cat .env_deploy_stage >> $GITHUB_ENV
+
+    - name: Deploy to S3
+      run: |
+        echo S3_BUCKET=$S3_BUCKET
+        echo CF_DIST=$CF_DIST
+        aws s3 ls s3://$S3_BUCKET/
+        script/deploy-aws.sh
