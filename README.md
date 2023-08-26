@@ -19,16 +19,13 @@ script/deploy-aws.sh
 
 ## But also infrastructure
 
-And then there's the 200 lines of YAML, because what's a cloud-era
-project with a 1:4 ratio of content development to infrastructre work?
-This is roughly the minimum to spin up a static site on S3 and
-CloudFront with https. The idea is it beats running a $5/mo server and
-manually tuning nginx config, and I wanted to automate the stuff I
-always mess up doing in the console, for some value of "worth."
+And then there's the 200 lines of YAML, because what's a cloud-era project with
+a 1:4 ratio of content development to infrastructure work? This is roughly the
+minimum to spin up a static site on S3 and CloudFront with https. I guess it's
+easier and cheaper than running a server.
 
-The remaining sections document various outposts on the journey to
-displaying a web page on the internet. The first two are fine for this
-project.
+The remaining sections document various outposts on the journey to displaying a
+web page on the internet. The first two are fine for this project.
 
 1. Manual S3/CloudFront/ACM provisioning
 1. Automate static site deployment with CloudFormation
@@ -67,15 +64,14 @@ Create the CloudFront distribution.
 
 ## Infrastructure deployment via CloudFormation
 
-This project includes a template `templates/static-site.yaml` to
-create the S3 bucket, CloudFront distribution, and certificate with
-reasonable defaults reasonably automatically. The template is derived
-from sources in [Amazon CloudFront Secure Static
-Website](https://github.com/aws-samples/amazon-cloudfront-secure-static-site).
+This project includes a template `templates/static-site.yaml` to create the S3
+bucket, CloudFront distribution, and certificate with reasonable defaults
+reasonably automatically. The template is derived from sources in [Amazon
+CloudFront Secure Static Website](https://github.com/aws-samples/amazon-cloudfront-secure-static-site).
 
-Simply deploy a new stack using the template and parameter overrides.
-If you do not have your domain set up as a Route53 hosted zone, set
-CreateDns=no. You'll need to create DNS records manually for:
+Simply deploy a new stack using the template and parameter overrides. If you do
+not have your domain set up as a Route53 hosted zone, set CreateDns=no. You'll
+need to create DNS records manually for:
 1. Domain verification for the ACM cert (during deployment)
 2. Pointing the subdomain to CloudFront (after deployment)
 
@@ -89,13 +85,16 @@ aws --region us-east-1 cloudformation deploy \
   --template-file infra/static-site.yaml \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
   --parameter-overrides DomainName=$DOMAIN SubDomain=$SUBDOMAIN CreateApex=yes CreateDns=no
-  
-# Deployment will block on certificate DNS validation. Go to the ACM
-# console to get the validation record details. Create the required
-# record at your DNS provider.
+```
 
-# Once deployment completes, point the domain to CloudFront
-echo "Create the following record at your DNS provider to point the site to AWS:"
+Deployment will block on certificate DNS validation. Go to the ACM
+console to get the validation record details. Create the required
+record at your DNS provider.
+
+Once deployment completes, point the domain to CloudFront. Create the following
+record at your DNS provider to point the site to AWS:
+
+```sh
 aws --region us-east-1 cloudformation describe-stacks \
   --stack-name $STACK \
   --query "Stacks[0].Outputs[?OutputKey=='DNSRecord'].OutputValue" --output text
@@ -124,13 +123,16 @@ open $URL
 
 ## Configure GitHub Actions
 
-https://github.com/aws-actions/configure-aws-credentials#sample-iam-oidc-cloudformation-template
+Set up GitHub Actions access to AWS as in
+[aws-actions](https://github.com/aws-actions/configure-aws-credentials#sample-iam-oidc-cloudformation-template).
 
-1. Depoy stack below.
-2. Create a role linked to the OIDC provider.
-   1. Create a policy with write access to the bucket.
+1. Deploy the stack below.
+2. Go to IAM and create a policy with write access to the bucket and CloudFront invalidation,
+   e.g. `infra/www-ci-policy.json`.
+3. Create a role linked to the GitHub OIDC provider. Attach the policy.
 
-To tweak the subject condition see [example subjects](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims).
+This template is setup for one GitHub user and repo. To tweak the subject
+condition see [example subjects](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims).
 
 ```sh
 GH_USER=shoover
