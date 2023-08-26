@@ -13,7 +13,10 @@ TTL=604800
 aws sts get-caller-identity
 
 # Sync content to S3. Display output and capture for CloudFront invalidation.
+# Annoyingly, this syncs all files in CI. Live with it; I don't want to risk
+# using --size-only for text files.
 aws s3 sync site s3://$S3_BUCKET \
+    --delete \
     --no-progress \
     --cache-control max-age=$TTL \
   | tee sync.log
