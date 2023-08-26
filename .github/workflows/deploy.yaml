@@ -1,0 +1,25 @@
+name: Trunk-based Deployment
+on:
+  push:
+    branches: [ci]
+      
+
+jobs:
+  deploy:
+    name: Upload to Amazon S3
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-github-actions-role-stage
+        aws-region: us-east-1
+    - name: Test AWS access
+      run: |
+        aws s3 ls s3://www-stage-s3bucketroot-15e64511z92nx/

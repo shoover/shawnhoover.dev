@@ -6,7 +6,7 @@ Parameters:
     Description: The part of a website address before your DomainName - e.g. www or img
     Type: String
     Default: www
-    AllowedPattern: ^[^.]*$
+    #AllowedPattern: ^[^.]*$
   DomainName:
     Description: The part of a website address after your SubDomain - e.g. example.com
     Type: String
@@ -163,6 +163,9 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       AccessControl: LogDeliveryWrite
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
