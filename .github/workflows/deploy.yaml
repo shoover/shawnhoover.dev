@@ -5,8 +5,8 @@ on:
       
 
 jobs:
-  deploy:
-    name: Upload to Amazon S3
+  deploy-to-stage:
+    name: Deploy stage-www
     runs-on: ubuntu-latest
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
@@ -20,9 +20,6 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-ci-role
         aws-region: us-east-1
-    - name: Test AWS access
-      run: |
-        aws s3 ls s3://www-stage-s3bucketroot-15e64511z92nx/
 
     - name: Configure Stage Deployment
       run: |
@@ -30,7 +27,30 @@ jobs:
 
     - name: Deploy to S3
       run: |
-        echo S3_BUCKET=$S3_BUCKET
-        echo CF_DIST=$CF_DIST
-        aws s3 ls s3://$S3_BUCKET/
         script/deploy-aws.sh
+
+  deploy-to-main:
+    name: Deploy www
+    needs: [deploy-to-stage]
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-ci-role
+        aws-region: us-east-1
+
+    - name: Configure Main Deployment
+      run: |
+        cat .env_deploy_main >> $GITHUB_ENV
+
+    - name: Deploy to S3
+      run: |
+        script/deploy-aws.sh
+        
