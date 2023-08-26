@@ -1,7 +1,8 @@
 name: Trunk-based Deployment
 on:
   push:
-    branches: [ci]
+    branches:
+      - main
       
 
 jobs:
