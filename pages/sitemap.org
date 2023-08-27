@@ -1,0 +1,3 @@
+#+TITLE: pages index
+
+- [[file:hello.org][hello]] hello

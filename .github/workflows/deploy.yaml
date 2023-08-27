@@ -3,6 +3,19 @@ on:
   push:
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - uses: purcell/setup-emacs@master
+      with:
+        version: 29.1
+    
+    - run: |
+        emacs --batch --directory publish --load publish/publish-org-dir.el pages
+
   deploy-to-stage:
     name: Deploy stage-www
 
