@@ -1,4 +1,9 @@
+* Intro
 org -> html -> s3.
+* Code
+#+begin_src sh
+pandoc -o dev.html --standalone ~/home/Dropbox/action/dev.org
+#+end_src
 
 * [org settings] :noexport:
 #+SETUPFILE: org.txt
