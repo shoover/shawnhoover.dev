@@ -1,18 +1,16 @@
 name: Trunk-based Deployment
 on:
   push:
-    branches:
-      - main
-      
 
 jobs:
   deploy-to-stage:
     name: Deploy stage-www
+
     runs-on: ubuntu-latest
-    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
-    permissions:
+    permissions: # Needed to interact with GitHub's OIDC Token endpoint.
       id-token: write
       contents: read
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -22,22 +20,21 @@ jobs:
         role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-ci-role
         aws-region: us-east-1
 
-    - name: Configure Stage Deployment
+    - name: Deploy to AWS - stage
       run: |
-        cat .env_deploy_stage >> $GITHUB_ENV
-
-    - name: Deploy to S3
-      run: |
+        source .env_deploy_stage
         script/deploy-aws.sh
 
   deploy-to-main:
     name: Deploy www
     needs: [deploy-to-stage]
+    if: github.ref == 'refs/heads/main'
+
     runs-on: ubuntu-latest
-    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
-    permissions:
+    permissions: # Needed to interact with GitHub's OIDC Token endpoint.
       id-token: write
       contents: read
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -47,11 +44,8 @@ jobs:
         role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-ci-role
         aws-region: us-east-1
 
-    - name: Configure Main Deployment
+    - name: Deploy to AWS - main
       run: |
-        cat .env_deploy_main >> $GITHUB_ENV
-
-    - name: Deploy to S3
-      run: |
+        source .env_deploy_main
         script/deploy-aws.sh
         

@@ -10,14 +10,26 @@ set -x # debug
 # It's a static static site
 TTL=604800
 
-# Sync content to S3. Display output and capture for CloudFront invalidation.
-# Annoyingly, this syncs all files in CI. Live with it; I don't want to risk
-# using --size-only for text files.
+rm -f sync.log
+touch sync.log
+
+# Sync content to S3. Capture output for CloudFront invalidation. Live with
+# syncing all files every time in CI (mtime is always newer on fresh clones);
+# --size-only for text files would skip nominal CSS changes.
 aws s3 sync site s3://$S3_BUCKET \
+    --exclude 'assets/*' \
     --delete \
     --no-progress \
     --cache-control max-age=$TTL \
-  | tee sync.log
+  | tee --append sync.log
+
+# Move assets
+aws s3 sync site/assets s3://$S3_BUCKET/assets \
+    --delete \
+    --size-only \
+    --no-progress \
+    --cache-control max-age=$TTL \
+  | tee --append sync.log
 
 # Invalidate cache for synced files
 sed -E -n -e "s/^(upload: site\/.+ to|delete:) s3:\/\/$S3_BUCKET\/(.+)$/\/\2/p" sync.log \
