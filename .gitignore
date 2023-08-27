@@ -1,3 +1,5 @@
 .env_deploy
 .env_secrets
-pages/publish
+
+build
+pages/sitemap.org

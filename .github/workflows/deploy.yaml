@@ -3,20 +3,7 @@ on:
   push:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - uses: purcell/setup-emacs@master
-      with:
-        version: 29.1
-    
-    - run: |
-        emacs --batch --directory publish --load publish/publish-org-dir.el pages
-
-  deploy-to-stage:
+  deploy-stage-www:
     name: Deploy stage-www
 
     runs-on: ubuntu-latest
@@ -32,16 +19,23 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-ci-role
         aws-region: us-east-1
+    - uses: purcell/setup-emacs@master
+      with:
+        version: 29.1
+    
+    - name: Publish orgmode pages
+      run: |
+        make build
 
     - name: Deploy to AWS - stage
       run: |
         source .env_deploy_stage
         script/deploy-aws.sh
 
-  deploy-to-main:
+  deploy-www:
     name: Deploy www
-    needs: [deploy-to-stage]
     if: github.ref == 'refs/heads/main'
+    needs: [deploy-stage-www]
 
     runs-on: ubuntu-latest
     permissions: # Needed to interact with GitHub's OIDC Token endpoint.
