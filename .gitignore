@@ -2,4 +2,6 @@
 .env_secrets
 
 build
-pages/sitemap.org
+pages/index.org
+pages/theindex.org
+pages/theindex.inc

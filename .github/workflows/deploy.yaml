@@ -23,7 +23,7 @@ jobs:
       with:
         version: 29.1
     
-    - name: Publish orgmode pages
+    - name: Build
       run: |
         make build
 

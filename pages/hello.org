@@ -3,5 +3,5 @@ org -> html -> s3.
 * [org settings] :noexport:
 #+SETUPFILE: org.txt
 #+TITLE: Hello orgmode!
-
+#+INDEX: helloworld
 

@@ -59,11 +59,12 @@ directory using the org HTML publisher."
                                        :publishing-directory ,target
                                        :publishing-function org-html-publish-to-html
                                        :auto-sitemap t
+                                       :sitemap-filename "index.org"
                                        :sitemap-format-entry sitemap-file-title
                                        ;; default alphabetic sort (uses title, not configurable)
                                        :sitemap-ignore-case t
-                                       :sitemap-title ,(format "%s index" project-name)
-                                       :make-index t
+                                       :sitemap-title ,(format "%s" project-name)
+                                       :makeindex t
                                        )
                                       ("css"
                                        :base-directory ,dir-exp
