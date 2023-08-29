@@ -19,17 +19,51 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-ci-role
         aws-region: us-east-1
-    - uses: purcell/setup-emacs@master
+
+    # Emacs caching strategy:
+    # - Emacs takes forever to build. Definitely don't do that.
+    # - setup-emacs installs cleanly from the nix cache in about a minute. Nice,
+    #   but too slow to use for every build.
+    # - Use setup-emacs to install once (per version) and save to the GitHub
+    #   cache. Cache the emacs package and all dependencies.
+    # - On a cache hit, restore and link to /nix/store so dynamic linking works.
+    # - Ideally, setup-emacs itself would save to the Action tool cache. That would require
+    #   rewriting the Action in JS, I think.    
+    - name: Cache emacs - Get
+      id: cache-emacs
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/.local/nix/store-emacs-29-1
+        key: ${{ runner.os }}-emacs-29-1
+   
+    - name: Cache emacs - Hit
+      if: steps.cache-emacs.outputs.cache-hit == 'true'
+      run: |
+        sudo mkdir -p /nix/store
+        sudo ln -s $HOME/.local/nix/store-emacs-29-1/* /nix/store/
+        emacs_store=$(find /nix/store -name "*-emacs-29-1")
+        test -x $emacs_store/bin/emacs
+        echo "$emacs_store/bin" >> $GITHUB_PATH
+
+    - name: Cache emacs - Miss - Install
+      uses: purcell/setup-emacs@master
+      if: steps.cache-emacs.outputs.cache-hit != 'true'
       with:
         version: 29.1
-    - name: Install Pandoc
+
+    - name: Cache emacs - Miss - Put
+      if: steps.cache-emacs.outputs.cache-hit != 'true'
       run: |
-        wget -O $RUNNER_TEMP/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.1.6.2/pandoc-3.1.6.2-1-amd64.deb
-        sudo dpkg -i $RUNNER_TEMP/pandoc.deb
-        pandoc --version
+        ls -l `which emacs`
+        emacs --version
+        mkdir -p $HOME/.local/nix/store-emacs-29-1
+        nix-store --query --requisites $(which emacs) | xargs -I {} rsync -av {} $HOME/.local/nix/store-emacs-29-1
 
     - name: Build
       run: |
+        set -x
+        file --dereference `which emacs`
+        emacs --version
         make build
 
     - name: Deploy to AWS - stage
