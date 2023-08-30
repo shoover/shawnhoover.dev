@@ -6,13 +6,14 @@
 
 #+STARTUP: hidestars indent overview
 #+LANGUAGE: en
-#+OPTIONS: H:3 num:1 toc:2 \n:nil ::t |:t ^:{} *:t TeX:t
+
+#+OPTIONS: H:3 toc:nil num:1 \n:nil ::t |:t ^:{} *:t TeX:t
+# Add toc separately per file: toc:2
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="tufte.css" />
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="styles.css" />
 #+options: html5-fancy:t
-#+options: html-postamble:my-org-html-postamble
+#+options: html-preamble:pages-html-preamble html-postamble:pages-html-postamble
 #+html_doctype: xhtml5
-#+html_link_home: /
-#+html_link_up: ./
-
+##+html_link_home: /
+##+html_link_up: ./

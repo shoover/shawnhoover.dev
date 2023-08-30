@@ -26,16 +26,20 @@
           (file-name-base entry)
           (org-publish-find-title entry project)))
 
-(defun my-org-html-postamble (options)
+(defun pages-html-preamble (options)
+  "<div class=\"nav_item fullwidth\">
+<a href=\"/\">shawnhoover.dev</a>
+ |
+<a href=\"./\">Pages</a>
+</div>")
+
+(defun pages-html-postamble (options)
   "Custom postamble function, because you can't customize the
 `org-html-postamble-format' alist in #+options, %d doesn't work,
 and dir-locals don't work either.
 
 Set org-html-postamble or #+options: html-postamble."
-  (format "<p class=\"author\">%s</p>
-<p class=\"date\">Updated %s</p>
-<p class=\"creator\"><a href=\"https://orgmode.org\">orgmode</a></p"
-          (car (plist-get options ':author))
+  (format "<p class=\"date\">Published %s</p>"
           (format-time-string "%d %b %Y")))
 
 (defun org-publish-dir-x (dir target project-name)

@@ -2,7 +2,7 @@
 html { font-size: 12.5px; }
 
 /* Smaller width for reading since org doesn't generate sidenotes */
-body { max-width: 800px;
+body { max-width: 1000px;
        padding-left: 12.5%;
        padding-right: 12.5%; /* Tufte only sets left, which is unbalanced */
      }
@@ -28,6 +28,13 @@ h6 { font-style: italic;
      margin-top: 1.8rem;
      margin-bottom: 0;
      line-height: 1; }
+
+.nav_item {
+    font-weight: 400;
+    font-size:1.5rem;
+}
+#preamble { max-width: 90%;
+            clear:both; }
 
 /* Not Roman numerals */
 .numeral { font-family: inherit; }
