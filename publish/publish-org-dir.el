@@ -1,19 +1,12 @@
-;; Usage: emacs --script publish-org-dir.el
-;; Assumes my-org-helpers.el is on the load-path (in site-lisp or via EMACSLOADPATH)
+;; Usage: emacs --script publish-org-dir.el [--force=t]
+
+(setq force-publish-all (member "--force=t" argv))
 
 ;; Use org from the package to avoid warnings about htmlize for formatting source code.
 (require 'package)
 (package-initialize)
 (require 'org)
-(message "Using org-version %s" org-version)
-
-(setq make-backup-files nil
-      auto-save-default nil)
-
-;; Fix coding prompt when writing ox-publish temp files.
-(set-language-environment "UTF-8")
-;; (add-to-list 'file-coding-system-alist '("" . (undecided . utf-8)) t
-;;              (lambda (a b) (equal (car a) (car b))))
+(message "Publishing with org-mode %s" org-version)
 
 ;; Something about generating the sitemap causes org-publish to prompt
 ;; about file locks if another session is editing a file in the project
@@ -52,37 +45,38 @@ directory using the org HTML publisher."
     (error "Org dir %s does not exist" dir))
 
   (let* ((dir-exp (expand-file-name dir))
-         (org-publish-project-alist `((,project-name
-                                       :components ("orgfiles" "css"))
-                                      ("orgfiles"
-                                       :base-directory ,dir-exp
-                                       :publishing-directory ,target
-                                       :publishing-function org-html-publish-to-html
-                                       :auto-sitemap t
-                                       :sitemap-filename "index.org"
-                                       :sitemap-format-entry sitemap-file-title
-                                       ;; default alphabetic sort (uses title, not configurable)
-                                       :sitemap-ignore-case t
-                                       :sitemap-title ,(format "%s" project-name)
-                                       :makeindex t
-                                       )
-                                      ("css"
-                                       :base-directory ,dir-exp
-                                       :base-extension "css"
-                                       :publishing-directory ,target
-                                       :publishing-function org-publish-attachment)))
+         (org-publish-project-alist
+          `((,project-name
+             :components ("orgfiles" "css"))
+            ("orgfiles"
+             :base-directory ,dir-exp
+             :publishing-directory ,target
+             :publishing-function org-html-publish-to-html
+             :auto-sitemap t
+             :sitemap-filename "index.org"
+             :sitemap-format-entry sitemap-file-title
+             :sitemap-ignore-case t
+             :sitemap-title ,(format "%s" project-name)
+             :makeindex t
+             )
+            ("css"
+             :base-directory ,dir-exp
+             :base-extension "css"
+             :publishing-directory ,target
+             :publishing-function org-publish-attachment)))
+
+         (make-backup-files nil)
+         (auto-save-default nil)
+
          ;; bypass coding system prompt for publish cache if some headlines have unicode
          (default-buffer-file-coding-system 'prefer-utf-8)
 
-         ;; set to t to bypass the cache and force publishing deleted files
-         (force nil))
+         (force force-publish-all))
 
     ;; Fix coding prompt when writing ox-publish temp files.
     (set-language-environment "UTF-8")
-    ;; (add-to-list 'file-coding-system-alist '("" . (undecided . utf-8)) t
-    ;;              (lambda (a b) (equal (car a) (car b))))
 
-    (message "Publishing org dir: %s" dir-exp)
+    (message "Publishing org-mode project: %s" dir-exp)
     (org-publish-project project-name force)))
 
 

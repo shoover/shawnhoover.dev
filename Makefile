@@ -1,3 +1,11 @@
+# Usage: make build
+#
+# Pass --force=t to force publishing all orgmode pages regardless of cache status.
+
+ifeq ($(force),)
+force := nil
+endif
+
 .PHONY: clean
 clean:
 	mkdir -p build/
@@ -16,4 +24,4 @@ build-static: | build-dir
 
 .PHONY: build-pages-orgmode
 build-pages-orgmode: | build-dir
-	emacs --script publish/publish-org-dir.el
+	emacs --script publish/publish-org-dir.el -- --force=$(force)
