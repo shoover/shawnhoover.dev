@@ -27,10 +27,10 @@
           (org-publish-find-title entry project)))
 
 (defun pages-html-preamble (options)
-  "<div class=\"nav_item fullwidth\">
-<a href=\"/\">shawnhoover.dev</a>
- |
-<a href=\"./\">Pages</a>
+  "<div class=\"nav_item fullwidth\"><nav>
+<ul><li><a href=\"/\">shawnhoover.dev</a>
+ 
+<li><a href=\"./\">Pages</a></ul></nav>
 </div>")
 
 (defun pages-html-postamble (options)
