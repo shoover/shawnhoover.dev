@@ -35,6 +35,19 @@ h6 { font-style: italic;
 }
 #preamble { max-width: 90%;
             clear:both; }
+            nav ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                width: 60px;
+              } 
+              nav li {
+                display: inline;
+              }
+             nav li a {
+                display: block;
+              }
+              
 
 /* Not Roman numerals */
 .numeral { font-family: inherit; }

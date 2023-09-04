@@ -29,7 +29,6 @@
 (defun pages-html-preamble (options)
   "<div class=\"nav_item fullwidth\"><nav>
 <ul><li><a href=\"/\">shawnhoover.dev</a>
- 
 <li><a href=\"./\">Pages</a></ul></nav>
 </div>")
 
