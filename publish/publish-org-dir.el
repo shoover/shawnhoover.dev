@@ -26,10 +26,10 @@
           (file-name-base entry)
           (org-publish-find-title entry project)))
 
-(defun pages-html-preamble (options)
+(defun notes-html-preamble (options)
   "<nav>
 <ul><li><a href=\"/\">shawnhoover.dev</a></li>
-<li><a href=\"./index.html\">Pages</a></li>
+<li><a href=\"./index.html\">Notes</a></li>
 </ul></nav>")
 
 (defun org-publish-dir-x (dir target project-name)
@@ -51,7 +51,6 @@ directory using the org HTML publisher."
              :sitemap-format-entry sitemap-file-title
              :sitemap-ignore-case t
              :sitemap-title ,(format "%s" project-name)
-             :makeindex t
              )
             ("css"
              :base-directory ,dir-exp
@@ -59,7 +58,7 @@ directory using the org HTML publisher."
              :publishing-directory ,target
              :publishing-function org-publish-attachment)))
 
-         (org-html-preamble 'pages-html-preamble)
+         (org-html-preamble 'notes-html-preamble)
 
          (org-html-metadata-timestamp-format "%d %b %Y")
          (org-html-postamble t)
@@ -81,4 +80,4 @@ directory using the org HTML publisher."
     (org-publish-project project-name force)))
 
 
-(org-publish-dir-x "pages" "build/pages" "shawnhoover.dev")
+(org-publish-dir-x "notes" "build/notes" "shawnhoover.dev")

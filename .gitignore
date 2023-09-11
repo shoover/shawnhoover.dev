@@ -2,6 +2,6 @@
 .env_secrets
 
 build
-pages/index.org
-pages/theindex.org
-pages/theindex.inc
+notes/index.org
+notes/theindex.org
+notes/theindex.inc

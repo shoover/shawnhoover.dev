@@ -1,13 +1,13 @@
 # Usage: make build
 #
-# Pass force=t to force publishing all orgmode pages regardless of cache status.
+# Pass force=t to force publishing all orgmode files regardless of cache status.
 
 ifeq ($(force),)
 force := nil
 endif
 
 .PHONY: build
-build: build-static build-pages-orgmode
+build: build-static build-notes-orgmode
 
 .PHONY: clean
 clean:
@@ -22,6 +22,6 @@ build-dir:
 build-static: | build-dir
 	rsync -av --exclude ".#*" site/ build/
 
-.PHONY: build-pages-orgmode
-build-pages-orgmode: | build-dir
+.PHONY: build-notes-orgmode
+build-notes-orgmode: | build-dir
 	emacs --script publish/publish-org-dir.el -- --force=$(force)
