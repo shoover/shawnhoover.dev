@@ -33,21 +33,26 @@ h6 { font-style: italic;
     font-weight: 400;
     font-size:1.5rem;
 }
-#preamble { max-width: 90%;
-            clear:both; }
-            nav ul {
-                list-style-type: none;
-                margin: 0;
-                padding: 0;
-                width: 60px;
-              } 
-              nav li {
-                display: inline;
-              }
-             nav li a {
-                display: block;
-              }
-              
+
+#preamble {
+    max-width: 90%;
+    clear:both;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+nav ul li {
+  float: left;
+  margin-right: .6em;
+}
+nav ul li:not(:first-child) {
+    margin-top: 0; // override tufte list spacing
+}
 
 /* Not Roman numerals */
 .numeral { font-family: inherit; }

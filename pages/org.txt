@@ -1,5 +1,5 @@
 -*-org-*-
-# some default startup and export settings
+# Default startup and export settings
 
 #+AUTHOR: Shawn Hoover
 #+EMAIL: shawn@shawnhoover.dev
@@ -8,12 +8,9 @@
 #+LANGUAGE: en
 
 #+OPTIONS: H:3 toc:nil num:1 \n:nil ::t |:t ^:{} *:t TeX:t
-# Add toc separately per file: toc:2
+# Add toc per file where appropriate: toc:2
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="tufte.css" />
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="styles.css" />
 #+options: html5-fancy:t
-#+options: html-preamble:pages-html-preamble html-postamble:pages-html-postamble
 #+html_doctype: xhtml5
-##+html_link_home: /
-##+html_link_up: ./

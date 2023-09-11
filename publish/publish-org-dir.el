@@ -27,19 +27,10 @@
           (org-publish-find-title entry project)))
 
 (defun pages-html-preamble (options)
-  "<div class=\"nav_item fullwidth\"><nav>
-<ul><li><a href=\"/\">shawnhoover.dev</a>
-<li><a href=\"./\">Pages</a></ul></nav>
-</div>")
-
-(defun pages-html-postamble (options)
-  "Custom postamble function, because you can't customize the
-`org-html-postamble-format' alist in #+options, %d doesn't work,
-and dir-locals don't work either.
-
-Set org-html-postamble or #+options: html-postamble."
-  (format "<p class=\"date\">Published %s</p>"
-          (format-time-string "%d %b %Y")))
+  "<nav>
+<ul><li><a href=\"/\">shawnhoover.dev</a></li>
+<li><a href=\"./index.html\">Pages</a></li>
+</ul></nav>")
 
 (defun org-publish-dir-x (dir target project-name)
   "Publishes all the .org files .css files in DIR to the TARGET
@@ -67,6 +58,13 @@ directory using the org HTML publisher."
              :base-extension "css"
              :publishing-directory ,target
              :publishing-function org-publish-attachment)))
+
+         (org-html-preamble 'pages-html-preamble)
+
+         (org-html-metadata-timestamp-format "%d %b %Y")
+         (org-html-postamble t)
+         (org-html-postamble-format '(("en" "<p class=\"date\">Published: %d</p>
+<p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by/4.0/80x15.png\" /></a> This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>.</p>")))
 
          (make-backup-files nil)
          (auto-save-default nil)

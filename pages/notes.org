@@ -3,5 +3,5 @@ See [[file:hello.org][Hello]] for formatted source code samples.
 * [org settings] :noexport:
 #+SETUPFILE: org.txt
 #+TITLE: Notes
+#+DATE: <2023-09-03 Sun 16:42>
 #+INDEX: notes links
-
