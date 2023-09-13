@@ -73,7 +73,7 @@ inserts the subtrees from `sitemap-rss-entry'."
 (defun notes-html-preamble (options)
   "<nav>
 <ul><li><a href=\"/\">shawnhoover.dev</a></li>
-<li><a href=\"./index.html\">Notes</a></li>
+<li><a href=\"/notes\">Notes</a></li>
 </ul></nav>")
 
 (defconst notes-license-html "<hr><p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by/4.0/80x15.png\" /></a> This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>.</p>")

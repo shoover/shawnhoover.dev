@@ -11,7 +11,7 @@ endif
 
 .PHONY: build clean build-dir build-static build-notes-orgmode serve deploy
 
-all: clean build
+all: build
 
 build: build-static build-notes-orgmode
 

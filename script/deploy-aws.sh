@@ -2,6 +2,7 @@
 
 set -e
 set -o pipefail
+set -x
 
 [[ -z "$S3_BUCKET" ]] && { echo "S3_BUCKET is required" ; exit 1; }
 [[ -z "$CF_DIST" ]] && { echo "CF_DIST is required" ; exit 1; }
@@ -20,6 +21,12 @@ aws s3 sync build s3://$S3_BUCKET \
     --delete \
     --no-progress \
     --cache-control max-age=$TTL \
+  | tee --append sync.log
+
+# Sync HTML indexes suitable for CloudFront. 'notes/index.html' becomes just 'notes'.
+# This command is borrowed from https://github.com/brandur/sorg/blob/master/Makefile.
+TARGET_DIR=build
+find ${TARGET_DIR} -name index.html | egrep -v "${TARGET_DIR}/index.html" | sed "s|^${TARGET_DIR}/||" | xargs -I{} -n1 dirname {} | xargs -I{} -n1 aws s3 cp ${TARGET_DIR}/{}/index.html s3://${S3_BUCKET}/{} --cache-control max-age=${TTL} --content-type text/html \
   | tee --append sync.log
 
 # Move assets
