@@ -10,35 +10,51 @@ reminder. The commands below automate cleaning up lambdas on unsupported
 runtimes.
 
 The email provides a list command to see what we're dealing with. Run it to get
-a space-separated list of ARNs with function name and version.
+a space-separated list of ARNs with function name and version (output is
+formatted multiline below for readability).
 
 #+begin_src sh
-aws lambda list-functions --function-version ALL --region us-east-1 --output text --query "Functions[?Runtime=='nodejs14.x'].FunctionArn"
+aws lambda list-functions --function-version ALL --region us-east-1 --output text \
+    --query "Functions[?Runtime=='nodejs14.x'].FunctionArn"
 
-# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:2     arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-RefreshAuthHandler-1C79RR5JD1ZE9:2
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:2
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-RefreshAuthHandler-1C79RR5JD1ZE9:2
 #+end_src
 
-Those are candidates for deletion. But first, check and make sure there's a
-later version. If not, you need update the configurations first (deploy a new
-version of serverless applications, or manually update the runtime of manually
-deployed lambdas).
+Those are candidates for deletion. But first, check and make sure they're not,
+you know, in use. In this case I had already updated the serverless application
+and there are later versions of all of the above. To check:
 
 #+begin_src sh
-aws lambda list-functions --function-version ALL --region us-east-1 --output text --query "Functions[?FunctionName=='serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW'].FunctionArn"
-# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:$LATEST arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:2 arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:3 arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:4 arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:5 arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:6 arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:7
+aws lambda list-functions --function-version ALL --region us-east-1 --output text \
+    --query "Functions[?FunctionName=='serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW'].FunctionArn"
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:$LATEST
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:2
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:3
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:4
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:5
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:6
+# arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:7
 #+end_src
 
 =aws lambda delete-function= takes one function name at a time. Test piping to
-=xargs= one function at a time:
+=xargs= with limit one:
 
 #+begin_src sh
-aws lambda list-functions --function-version ALL --region us-east-1 --output text --query "Functions[?Runtime=='nodejs14.x'].FunctionArn" | xargs -n1 echo
+aws lambda list-functions --function-version ALL --region us-east-1 --output text \
+    --query "Functions[?Runtime=='nodejs14.x'].FunctionArn" \
+    | xargs -n1 echo TO DELETE: 
+
+# TO DELETE: arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-ParseAuthHandler-MAMZ03R4QCXW:2
+# TO DELETE: arn:aws:lambda:us-east-1:668334381016:function:serverlessrepo-notes-RefreshAuthHandler-1C79RR5JD1ZE9:2
 #+end_src
 
 And delete:
 
 #+begin_src sh
-aws lambda list-functions --function-version ALL --region us-east-1 --output text --query "Functions[?Runtime=='nodejs14.x'].FunctionArn" | xargs -n1 aws lambda delete-function --region us-east-1 --function-name
+aws lambda list-functions --function-version ALL --region us-east-1 --output text \
+    --query "Functions[?Runtime=='nodejs14.x'].FunctionArn" \
+    | xargs -n1 aws lambda delete-function --region us-east-1 --function-name
 #+end_src
 
 
