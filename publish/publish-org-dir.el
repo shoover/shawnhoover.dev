@@ -6,7 +6,11 @@
 (require 'package)
 (package-initialize)
 (require 'org)
-(require 'ox-rss)
+(load-file (expand-file-name "ox-rss.el" (file-name-directory (if load-in-progress
+                                                                  load-file-name
+                                                                (buffer-file-name)))))
+;; (require 'ox-rss) ; ox-rss just disappeared from nongnu elpa?
+
 (require 'ox-icalendar) ; Workaround ox-rss using icalendar without loading it
 
 (message "Publishing with org-mode %s" org-version)

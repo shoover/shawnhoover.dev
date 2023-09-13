@@ -1,9 +1,0 @@
-#+TITLE: Notes
-#+DESCRIPTION: A few notes
-#+DATE: <2023-09-03 Sun 16:42>
-
-See [[file:hello.org][Hello]] for formatted source code samples.
-
-* [org settings] :noexport:
-#+SETUPFILE: org.txt
-#+INDEX: notes links

@@ -1,0 +1,36 @@
+#+TITLE: Introduction
+#+DESCRIPTION: Hello world
+#+DATE: <2023-09-12 Sun>
+
+
+I have accreted notes in orgmode files since 2009 on all manner of personal and
+work projects, todo lists, reference material on numerous hobby and software
+development topics, takeaways from books I read, workstation setup breadcrumbs,
+scripts that may not make sense in any particular repository but should be saved
+/somewhere/, recipes, instrument plans... on and on for 80k lines of notes. At
+work, most longer email or document drafts start as a subtree in a living
+orgmode file before being exported to HTML or Word. If we're chatting about X
+and I say, "Let me check my notes" and come back with a link related to X, it
+surely came from one of those orgmode files.
+
+From day one, my org files have been saved in Dropbox (for personal files;
+OneDrive for work) for reliable sync and short term versioning. This is by and
+large a one-way setup. Mobile capture is via Google Keep and manual sweep to
+orgmode on the desktop (I tried an orgmode app briefly, but two-way sync was
+more trouble than it was worth). At some point long ago I set up a cron job to
+export personal files to HTML for reading in the Dropbox app on my phone. When
+the in-app viewer broke relative links, I set up a private static site (along
+the lines of [[https://github.com/shoover/shawnhoover.dev#private-static-site][Private static site]]).
+
+That's all well and good for a private workflow. Orgmode makes me happy, and I
+suspect I'll keep all of the above running for as long as I compute.
+
+Lately at work I've been redirecting more notes into Confluence for sharing.
+This blog is a venue to redirect notes suitable for public sharing and my own
+searches. I expect to post mainly TIL-style posts.
+
+Living is learning.
+
+* [org settings] :noexport:
+#+SETUPFILE: org.txt
+#+INDEX: notes links

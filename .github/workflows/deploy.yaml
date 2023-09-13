@@ -64,7 +64,8 @@ jobs:
         set -x
         file --dereference `which emacs`
         emacs --version
-        emacs --batch --eval "(package-install 'ox-rss)"
+        emacs --batch --eval "(package-list-packages)"
+        #emacs --batch --eval "(package-install 'ox-rss)"
         make build
 
     - name: Deploy to AWS - stage

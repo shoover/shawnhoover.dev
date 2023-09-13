@@ -3,9 +3,10 @@
 html { font-size: 12.5px; }
 
 /* Smaller width for reading since org doesn't generate sidenotes */
-body { max-width: 1000px;
-       padding-left: 12.5%;
-       padding-right: 12.5%; /* Tufte only sets left, which is unbalanced */
+body { max-width: 789px;
+       width: 84%;
+       padding-left: 8%;
+       padding-right: 8%; /* Tufte only sets left, which is unbalanced */
      }
 
 /* Adder deeper headings */
@@ -98,6 +99,9 @@ pre.src { width: 95%;
           overflow-x: scroll; }
 
 @media (max-width: 760px) {
+    body { padding-left: 8%;
+           padding-right: 8%;
+           max-width: 84%; }
     pre.src { padding: 0; }
 }
 
