@@ -15,7 +15,9 @@ export AWS_SECRET_ACCESS_KEY=...
 export S3_BUCKET=...
 export CF_DIST=...
 make build
-script/deploy-aws.sh
+make serve &
+curl http://127.0.0.1:8011
+make deploy
 ```
 
 Emacs 28+ is also required for the build.
@@ -122,8 +124,7 @@ echo "export CF_DIST=`aws --region us-east-1 cloudformation describe-stacks \
   --stack-name $STACK \
   --query \"Stacks[0].Outputs[?OutputKey=='CloudFrontDistribution'].OutputValue\" --output text`" >> .env_deploy
 source .env_deploy
-make build
-script/deploy-aws.sh
+make build deploy
 ```
 
 And browse!

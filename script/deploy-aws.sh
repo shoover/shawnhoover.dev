@@ -2,7 +2,6 @@
 
 set -e
 set -o pipefail
-set -x # debug
 
 [[ -z "$S3_BUCKET" ]] && { echo "S3_BUCKET is required" ; exit 1; }
 [[ -z "$CF_DIST" ]] && { echo "CF_DIST is required" ; exit 1; }
