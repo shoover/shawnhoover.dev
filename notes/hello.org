@@ -8,6 +8,5 @@ pandoc -o dev.html --standalone ~/home/Dropbox/action/dev.org
 * [org settings] :noexport:
 #+SETUPFILE: org.txt
 #+TITLE: Hello orgmode!
-#+DESCRIPTION: A basic page template
-#+DATE: <2023-08-25>
+#+DATE: <2023-09-05 Tue>
 #+INDEX: helloworld

@@ -13,6 +13,7 @@ build: build-static build-notes-orgmode
 clean:
 	mkdir -p build/
 	rm -f -r build/*
+	rm -f notes/index.org
 
 .PHONY: build-dir
 build-dir:
@@ -25,3 +26,7 @@ build-static: | build-dir
 .PHONY: build-notes-orgmode
 build-notes-orgmode: | build-dir
 	emacs --script publish/publish-org-dir.el -- --force=$(force)
+
+.PHONY: serve
+serve:
+	python3 -m http.server --directory=build 8011

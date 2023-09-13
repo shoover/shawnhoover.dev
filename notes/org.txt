@@ -10,7 +10,10 @@
 #+OPTIONS: H:3 toc:nil num:1 \n:nil ::t |:t ^:{} *:t TeX:t
 # Add toc per file where appropriate: toc:2
 
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="org.css" />
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="tufte.css" />
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="styles.css" />
-#+options: html5-fancy:t
+#+HTML_HEAD: <link rel="alternate" type="application/atom+xml" href="index.xml" />
+
+#+options: html5-fancy:t html-style:nil html-self-link-headlines:t
 #+html_doctype: xhtml5
