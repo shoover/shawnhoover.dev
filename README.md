@@ -2,8 +2,8 @@ A static site for [my personal landing page](https://shawnhoover.dev)
 
 # Just a website
 
-The site itself is 50 lines of HTML, plus styles and supporting media
-assets, hosted on S3 and CloudFront.
+The site is a bit of static HTML and a an orgmode-generated blog, plus styles
+and supporting media assets, hosted on S3 and CloudFront.
 
 In short:
 
@@ -14,8 +14,20 @@ export AWS_SECRET_ACCESS_KEY=...
 
 export S3_BUCKET=...
 export CF_DIST=...
+make build
 script/deploy-aws.sh
 ```
+
+Emacs 28+ is also required for the build.
+
+## Orgmode-generated blog
+
+The "Notes" blog is generated from orgmode files using the org project
+publishing system. Orgmode is great. The project system is nice and
+automatically supports links between files, including converting .org links to
+.html when publishing. Sitemap and RSS functionality are more of the DIY nature,
+and kind of painful. All the details are in `Makefile` and
+`publish/publish-org-dir.el`.
 
 ## But also infrastructure
 
@@ -110,6 +122,7 @@ echo "export CF_DIST=`aws --region us-east-1 cloudformation describe-stacks \
   --stack-name $STACK \
   --query \"Stacks[0].Outputs[?OutputKey=='CloudFrontDistribution'].OutputValue\" --output text`" >> .env_deploy
 source .env_deploy
+make build
 script/deploy-aws.sh
 ```
 
