@@ -127,7 +127,7 @@ directory using the org HTML publisher."
          (org-html-metadata-timestamp-format "%d %b %Y")
          (org-html-postamble t)
          (org-html-postamble-format
-          (list (list "en" (concat "<p class=\"date\">Published: %d</p>"
+          (list (list "en" (concat "<hr><p class=\"date\">Published: %d</p>"
                                    notes-license-html))))
 
          (make-backup-files nil)
