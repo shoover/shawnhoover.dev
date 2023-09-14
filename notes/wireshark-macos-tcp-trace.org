@@ -1,0 +1,14 @@
+#+title: Tracing TCP Connections on MacOS: Wireshark
+#+description: Just use Wireshark
+#+date: <2023-09-13>
+#+setupfile: org.txt
+
+I needed to poke an HTTP connection pool and observe connections being reused or
+reset. On Windows I would reach for SysInternals Process Monitor straight away,
+but it was suprisingly hard to find solid recommendations for MacOS.
+
+The answer is Wireshark. Case closed. It has way more power than I needed, but
+it was also super easy to set up and use for exactly what I needed. Install
+Wireshark, run it, pick a network interface, click Start, click through the
+recommended driver installation, set a quick filter for the TCP port and SYN
+flags. Done.
