@@ -79,10 +79,12 @@ inserts the subtrees from `sitemap-rss-entry'."
 <li><a href=\"/notes/index.html\">Notes</a></li>
 </ul></nav>")
 
-(defconst notes-license-html "<hr><p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by/4.0/80x15.png\" /></a> This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>.</p>")
+(defconst notes-footer
+  (concat "<hr><p><a href=\"/notes/index.xml\"><img src=\"/assets/icons/feed.svg\" class=\"feed_icon\"/> RSS</a></p>"
+          "<p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by/4.0/80x15.png\" /></a> This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>.</p>"))
 
 (defun sitemap-postamble (options)
-  notes-license-html)
+  notes-footer)
 
 (defun org-publish-dir-x (dir target project-name)
   "Publishes all the .org files .css files in DIR to the TARGET
@@ -104,7 +106,7 @@ directory using the org HTML publisher."
 
              :auto-sitemap t
              :sitemap-filename "index.org"
-             :sitemap-title ,(format "%s" project-name)
+             :sitemap-title ,project-name
              :sitemap-sort-files anti-chronologically
              ;;:sitemap-ignore-case t
              :sitemap-format-entry sitemap-rss-entry
@@ -122,9 +124,10 @@ directory using the org HTML publisher."
              :exclude ".*"
              :include ("index.org")
 
-             :title ,project-name
+             :title ,(format "shawnhoover.dev - %s" project-name)
              :html-link-home "https://shawnhoover.dev/notes/"
              :html-link-use-abs-url t
+             :rss-image-url "https://shawnhoover.dev/assets/icons/feed.svg"
 
              :section-numbers nil
              :table-of-contents nil)))
@@ -135,7 +138,7 @@ directory using the org HTML publisher."
          (org-html-postamble t)
          (org-html-postamble-format
           (list (list "en" (concat "<hr><p class=\"date\">Published: %d</p>"
-                                   notes-license-html))))
+                                   notes-footer))))
 
          (make-backup-files nil)
          (auto-save-default nil)
