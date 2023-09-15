@@ -25,10 +25,9 @@ aws s3 sync build s3://$S3_BUCKET \
 
 # Sync HTML indexes suitable for CloudFront. 'notes/index.html' becomes just 'notes'.
 # This command is borrowed from https://github.com/brandur/sorg/blob/master/Makefile.
-# Annnd it doesn't work with orgmode sitemap relative links... skip for now.
-#TARGET_DIR=build
-# find ${TARGET_DIR} -name index.html | egrep -v "${TARGET_DIR}/index.html" | sed "s|^${TARGET_DIR}/||" | xargs -I{} -n1 dirname {} | xargs -I{} -n1 aws s3 cp ${TARGET_DIR}/{}/index.html s3://${S3_BUCKET}/{} --cache-control max-age=${TTL} --content-type text/html \
-#   | tee --append sync.log
+TARGET_DIR=build
+find ${TARGET_DIR} -name index.html | egrep -v "${TARGET_DIR}/index.html" | sed "s|^${TARGET_DIR}/||" | xargs -I{} -n1 dirname {} | xargs -I{} -n1 aws s3 cp ${TARGET_DIR}/{}/index.html s3://${S3_BUCKET}/{} --cache-control max-age=${TTL} --content-type text/html \
+  | tee --append sync.log
 
 # Move assets
 aws s3 sync build/assets s3://$S3_BUCKET/assets \

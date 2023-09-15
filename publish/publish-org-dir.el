@@ -76,7 +76,7 @@ inserts the subtrees from `sitemap-rss-entry'."
 (defun notes-html-preamble (options)
   "<nav>
 <ul><li><a href=\"/\">shawnhoover.dev</a></li>
-<li><a href=\"/notes/index.html\">Notes</a></li>
+<li><a href=\"/notes\">Notes</a></li>
 </ul></nav>")
 
 (defconst notes-footer
