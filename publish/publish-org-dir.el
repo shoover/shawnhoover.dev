@@ -165,6 +165,8 @@ directory using the org HTML publisher."
 
   (cd (concat (file-name-directory (buffer-file-name)) "/.."))
 
+  (org-publish-remove-all-timestamps)
+
   (let ((force-publish-all t))
     (org-publish-dir-x "notes" "build/notes" "Notes"))
   )

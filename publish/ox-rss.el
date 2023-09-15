@@ -1,5 +1,12 @@
 ;;; ox-rss.el --- RSS 2.0 Back-End for Org Export Engine
 
+;; shawnhoover.dev changes:
+;; 1. Set the channel title to export property RSS_TITLE if it exists. Otherwise fall
+;;    back on TITLE (the previous default).
+;; 2. Use `org-link-display-format' to parse item titles from headline links instead of
+;;    parsing the link with a regexp.
+;; 3. Set item isPermalink=true when it is an http/https URL.
+
 ;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
 ;; Author: Bastien Guerry <bzg@gnu.org>
@@ -256,13 +263,25 @@ communication channel."
 			                (format-time-string
 			                 "%a, %d %b %Y %T %z"
 			                 (org-time-string-to-time pubdate0)))))
+             (foo (message "RSS_TITLE: %s\nraw-value: %s\nreplacement: %s"
+                           (org-element-property :RSS_TITLE headline)
+                           (org-element-property :raw-value headline)
+                           (replace-regexp-in-string
+                            org-link-bracket-re
+                            (lambda (m) (or (match-string 2 m)
+				                            (match-string 1 m)))
+                            (org-element-property :raw-value headline))))
 	         (title (org-rss-plain-text
 		             (or (org-element-property :RSS_TITLE headline)
-			             (replace-regexp-in-string
-			              org-link-bracket-re
-			              (lambda (m) (or (match-string 3 m)
-					                      (match-string 1 m)))
-			              (org-element-property :raw-value headline))) info))
+
+                         (org-link-display-format (org-element-property :raw-value headline))
+			             ;; (replace-regexp-in-string
+			             ;;  org-link-bracket-re
+			             ;;  (lambda (m) (or (match-string 3 m)
+					     ;;                  (match-string 1 m)))
+			             ;;  (org-element-property :raw-value headline))
+                         )
+                     info))
 	         (publink
 	          (or (and hl-perm (concat (or hl-home hl-pdir) hl-perm))
 		          (concat
@@ -276,7 +295,10 @@ communication channel."
 		              (or (org-element-property :ID headline)
 			              (org-element-property :CUSTOM_ID headline)
 			              publink)
-		              info))))
+		              info)))
+             (guid-is-perm (if (org-rss-permalink-p guid)
+                               "true"
+                             "false")))
 	    (if (not pubdate) "" ;; Skip entries with no PUBDATE prop
 	      (format
 	       (concat
@@ -284,12 +306,18 @@ communication channel."
 	        "<title>%s</title>\n"
 	        "<link>%s</link>\n"
 	        "<author>%s (%s)</author>\n"
-	        "<guid isPermaLink=\"false\">%s</guid>\n"
+	        "<guid isPermaLink=\"%s\">%s</guid>\n"
 	        "<pubDate>%s</pubDate>\n"
 	        (org-rss-build-categories headline info) "\n"
 	        "<description><![CDATA[%s]]></description>\n"
 	        "</item>\n")
-	       title publink email author guid pubdate contents))))))
+	       title publink email author guid-is-perm guid pubdate contents))))))
+
+(defun org-rss-permalink-p (guid)
+  "Check whether GUID is a permalink. Returns non-nil if GUID is a URL of type http/https."
+
+  (let ((u (url-generic-parse-url guid)))
+    (member (url-type u) '("http" "https"))))
 
 (defun org-rss-build-categories (headline info)
   "Build categories for the RSS item from INFO.

@@ -9,7 +9,8 @@ ifeq ($(force),)
 force := nil
 endif
 
-.PHONY: browse build build-dir build-notes-orgmode build-static clean deploy serve
+.PHONY: browse build build-dir build-notes-orgmode build-static clean clean-publish-cache
+.PHONY: deploy serve
 
 all: build
 
@@ -32,6 +33,11 @@ clean:
 	mkdir -p build/
 	rm -f -r build/*
 	rm -f notes/index.org
+
+# Reset the global org publish cache, typically in ~/.org-timestamps. It's a blunt tool
+# for when sitemap headlines get cached and don't update.
+clean-publish-cache:
+	emacs --batch --eval "(progn (require 'ox-publish) (org-publish-remove-all-timestamps))"
 
 serve:
 	python3 -m http.server --directory=build 8011
