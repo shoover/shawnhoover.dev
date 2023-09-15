@@ -105,8 +105,8 @@ headlines.  When set to another value, extract the category
 from the :CATEGORY: property of the entry."
   :group 'org-export-rss
   :type '(choice
-	  (const :tag "From tags" from-tags)
-	  (const :tag "From the category property" from-category)))
+	      (const :tag "From tags" from-tags)
+	      (const :tag "From the category property" from-category)))
 
 (defcustom org-rss-use-entry-url-as-guid t
   "Use the URL for the <guid> metatag?
@@ -120,12 +120,12 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
   :menu-entry
   '(?r "Export to RSS"
        ((?R "As RSS buffer"
-	    (lambda (a s v b) (org-rss-export-as-rss a s v)))
-	(?r "As RSS file" (lambda (a s v b) (org-rss-export-to-rss a s v)))
-	(?o "As RSS file and open"
-	    (lambda (a s v b)
-	      (if a (org-rss-export-to-rss t s v)
-		(org-open-file (org-rss-export-to-rss nil s v)))))))
+	        (lambda (a s v b) (org-rss-export-as-rss a s v)))
+	    (?r "As RSS file" (lambda (a s v b) (org-rss-export-to-rss a s v)))
+	    (?o "As RSS file and open"
+	        (lambda (a s v b)
+	          (if a (org-rss-export-to-rss t s v)
+		        (org-open-file (org-rss-export-to-rss nil s v)))))))
   :options-alist
   '((:description "DESCRIPTION" nil nil newline)
     (:keywords "KEYWORDS" nil nil space)
@@ -136,12 +136,12 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
     (:rss-categories nil nil org-rss-categories))
   :filters-alist '((:filter-final-output . org-rss-final-function))
   :translate-alist '((headline . org-rss-headline)
-		     (comment . (lambda (&rest args) ""))
-		     (comment-block . (lambda (&rest args) ""))
-		     (timestamp . (lambda (&rest args) ""))
-		     (plain-text . org-rss-plain-text)
-		     (section . org-rss-section)
-		     (template . org-rss-template)))
+		             (comment . (lambda (&rest args) ""))
+		             (comment-block . (lambda (&rest args) ""))
+		             (timestamp . (lambda (&rest args) ""))
+		             (plain-text . org-rss-plain-text)
+		             (section . org-rss-section)
+		             (template . org-rss-template)))
 
 ;;; Export functions
 
@@ -201,7 +201,7 @@ Return output file's name."
     (org-icalendar-create-uid file 'warn-user)
     (org-rss-add-pubdate-property))
   (let ((outfile (org-export-output-file-name
-		  (concat "." org-rss-extension) subtreep)))
+		          (concat "." org-rss-extension) subtreep)))
     (org-export-to-file 'rss outfile async subtreep visible-only)))
 
 ;;;###autoload
@@ -215,10 +215,10 @@ publishing directory.
 Return output file name."
   (let ((bf (get-file-buffer filename)))
     (if bf
-	  (with-current-buffer bf
-	    (org-icalendar-create-uid filename 'warn-user)
-	    (org-rss-add-pubdate-property)
-	    (write-file filename))
+	    (with-current-buffer bf
+	      (org-icalendar-create-uid filename 'warn-user)
+	      (org-rss-add-pubdate-property)
+	      (write-file filename))
       (find-file filename)
       (org-icalendar-create-uid filename 'warn-user)
       (org-rss-add-pubdate-property)
@@ -236,59 +236,59 @@ communication channel."
       (org-export-data-with-backend headline 'html info)
     (unless (org-element-property :footnote-section-p headline)
       (let* ((email (org-export-data (plist-get info :email) info))
-	     (author (and (plist-get info :with-author)
-			  (let ((auth (plist-get info :author)))
-			    (and auth (org-export-data auth info)))))
-	     (htmlext (plist-get info :html-extension))
-	     (hl-number (org-export-get-headline-number headline info))
-	     (hl-home (file-name-as-directory (plist-get info :html-link-home)))
-	     (hl-pdir (plist-get info :publishing-directory))
-	     (hl-perm (org-element-property :RSS_PERMALINK headline))
-	     (anchor
+	         (author (and (plist-get info :with-author)
+			              (let ((auth (plist-get info :author)))
+			                (and auth (org-export-data auth info)))))
+	         (htmlext (plist-get info :html-extension))
+	         (hl-number (org-export-get-headline-number headline info))
+	         (hl-home (file-name-as-directory (plist-get info :html-link-home)))
+	         (hl-pdir (plist-get info :publishing-directory))
+	         (hl-perm (org-element-property :RSS_PERMALINK headline))
+	         (anchor
               (or (org-element-property :CUSTOM_ID headline)
                   (org-export-get-reference headline info)))
-	     (category (org-rss-plain-text
-			(or (org-element-property :CATEGORY headline) "") info))
-	     (pubdate0 (org-element-property :PUBDATE headline))
-	     (pubdate (let ((system-time-locale "C"))
-			(if (and pubdate0 (not (string-empty-p pubdate0)))
-			    (format-time-string
-			     "%a, %d %b %Y %T %z"
-			     (org-time-string-to-time pubdate0)))))
-	     (title (org-rss-plain-text
-		     (or (org-element-property :RSS_TITLE headline)
-			 (replace-regexp-in-string
-			  org-link-bracket-re
-			  (lambda (m) (or (match-string 3 m)
-					  (match-string 1 m)))
-			  (org-element-property :raw-value headline))) info))
-	     (publink
-	      (or (and hl-perm (concat (or hl-home hl-pdir) hl-perm))
-		  (concat
-		   (or hl-home hl-pdir)
-		   (file-name-nondirectory
-		    (file-name-sans-extension
-		     (plist-get info :input-file))) "." htmlext "#" anchor)))
-	     (guid (if org-rss-use-entry-url-as-guid
-		       publink
-		     (org-rss-plain-text
-		      (or (org-element-property :ID headline)
-			  (org-element-property :CUSTOM_ID headline)
-			  publink)
-		      info))))
-	(if (not pubdate) "" ;; Skip entries with no PUBDATE prop
-	  (format
-	   (concat
-	    "<item>\n"
-	    "<title>%s</title>\n"
-	    "<link>%s</link>\n"
-	    "<author>%s (%s)</author>\n"
-	    "<guid isPermaLink=\"false\">%s</guid>\n"
-	    "<pubDate>%s</pubDate>\n"
-	    (org-rss-build-categories headline info) "\n"
-	    "<description><![CDATA[%s]]></description>\n"
-	    "</item>\n")
-	   title publink email author guid pubdate contents))))))
+	         (category (org-rss-plain-text
+			            (or (org-element-property :CATEGORY headline) "") info))
+	         (pubdate0 (org-element-property :PUBDATE headline))
+	         (pubdate (let ((system-time-locale "C"))
+			            (if (and pubdate0 (not (string-empty-p pubdate0)))
+			                (format-time-string
+			                 "%a, %d %b %Y %T %z"
+			                 (org-time-string-to-time pubdate0)))))
+	         (title (org-rss-plain-text
+		             (or (org-element-property :RSS_TITLE headline)
+			             (replace-regexp-in-string
+			              org-link-bracket-re
+			              (lambda (m) (or (match-string 3 m)
+					                      (match-string 1 m)))
+			              (org-element-property :raw-value headline))) info))
+	         (publink
+	          (or (and hl-perm (concat (or hl-home hl-pdir) hl-perm))
+		          (concat
+		           (or hl-home hl-pdir)
+		           (file-name-nondirectory
+		            (file-name-sans-extension
+		             (plist-get info :input-file))) "." htmlext "#" anchor)))
+	         (guid (if org-rss-use-entry-url-as-guid
+		               publink
+		             (org-rss-plain-text
+		              (or (org-element-property :ID headline)
+			              (org-element-property :CUSTOM_ID headline)
+			              publink)
+		              info))))
+	    (if (not pubdate) "" ;; Skip entries with no PUBDATE prop
+	      (format
+	       (concat
+	        "<item>\n"
+	        "<title>%s</title>\n"
+	        "<link>%s</link>\n"
+	        "<author>%s (%s)</author>\n"
+	        "<guid isPermaLink=\"false\">%s</guid>\n"
+	        "<pubDate>%s</pubDate>\n"
+	        (org-rss-build-categories headline info) "\n"
+	        "<description><![CDATA[%s]]></description>\n"
+	        "</item>\n")
+	       title publink email author guid pubdate contents))))))
 
 (defun org-rss-build-categories (headline info)
   "Build categories for the RSS item from INFO.
@@ -306,13 +306,13 @@ Fallback to the HEADLINE :CATEGORY property."
 CONTENTS is the transcoded contents string.  INFO is a plist used
 as a communication channel."
   (let ((style (plist-get info :rss-stylesheet)))
-	  (concat
-	   (format "<?xml version=\"1.0\" encoding=\"%s\"?>"
-			       (symbol-name org-html-coding-system))
-	   (if style
-		     (format "\n<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>"
-				         style))
-	   "\n<rss version=\"2.0\"
+	(concat
+	 (format "<?xml version=\"1.0\" encoding=\"%s\"?>"
+			 (symbol-name org-html-coding-system))
+	 (if style
+		 (format "\n<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>"
+				 style))
+	 "\n<rss version=\"2.0\"
 	xmlns:content=\"http://purl.org/rss/1.0/modules/content/\"
 	xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\"
 	xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
@@ -322,35 +322,35 @@ as a communication channel."
 	xmlns:georss=\"http://www.georss.org/georss\"
         xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\"
         xmlns:media=\"http://search.yahoo.com/mrss/\">"
-	   "<channel>"
-	   (org-rss-build-channel-info info) "\n"
-	   contents
-	   "</channel>\n"
-	   "</rss>")))
+	 "<channel>"
+	 (org-rss-build-channel-info info) "\n"
+	 contents
+	 "</channel>\n"
+	 "</rss>")))
 
 (defun org-rss-build-channel-info (info)
   "Given plist INFO build the RSS channel information."
   (let* ((system-time-locale "C")
-	 (title (org-export-data (plist-get info :title) info))
-	 (email (org-export-data (plist-get info :email) info))
-	 (author (and (plist-get info :with-author)
-		      (let ((auth (plist-get info :author)))
-			(and auth (org-export-data auth info)))))
-	 (date (format-time-string "%a, %d %b %Y %T %z")) ;; RFC 882
-	 (description (org-export-data (plist-get info :description) info))
-	 (lang (plist-get info :language))
-	 (keywords (plist-get info :keywords))
-	 (rssext (plist-get info :rss-extension))
-	 (blogurl (or (plist-get info :html-link-home)
-		      (plist-get info :publishing-directory)))
-	 (image (url-encode-url (plist-get info :rss-image-url)))
-	 (ifile (plist-get info :input-file))
-	 (publink
-	  (or (plist-get info :rss-feed-url)
-	      (concat (file-name-as-directory blogurl)
-		      (file-name-nondirectory
-		       (file-name-sans-extension ifile))
-		      "." rssext))))
+	     (title (org-export-data (plist-get info :title) info))
+	     (email (org-export-data (plist-get info :email) info))
+	     (author (and (plist-get info :with-author)
+		              (let ((auth (plist-get info :author)))
+			            (and auth (org-export-data auth info)))))
+	     (date (format-time-string "%a, %d %b %Y %T %z")) ;; RFC 882
+	     (description (org-export-data (plist-get info :description) info))
+	     (lang (plist-get info :language))
+	     (keywords (plist-get info :keywords))
+	     (rssext (plist-get info :rss-extension))
+	     (blogurl (or (plist-get info :html-link-home)
+		              (plist-get info :publishing-directory)))
+	     (image (url-encode-url (plist-get info :rss-image-url)))
+	     (ifile (plist-get info :input-file))
+	     (publink
+	      (or (plist-get info :rss-feed-url)
+	          (concat (file-name-as-directory blogurl)
+		              (file-name-nondirectory
+		               (file-name-sans-extension ifile))
+		              "." rssext))))
     (format
      "\n<title>%s</title>
 <atom:link href=\"%s\" rel=\"self\" type=\"application/rss+xml\" />
@@ -369,9 +369,9 @@ as a communication channel."
 "
      title publink blogurl description lang date date
      (concat (format "Emacs %d.%d"
-		     emacs-major-version
-		     emacs-minor-version)
-	     " Org-mode " (org-version))
+		             emacs-major-version
+		             emacs-minor-version)
+	         " Org-mode " (org-version))
      email author image title blogurl)))
 
 (defun org-rss-section (section contents info)
@@ -392,8 +392,8 @@ information."
 INFO is a plist used as a communication channel"
   (let (output)
     (setq output (org-html-encode-plain-text contents)
-	  output (org-export-activate-smart-quotes
-		  output :html info))))
+	      output (org-export-activate-smart-quotes
+		          output :html info))))
 
 ;;; Filters
 
@@ -416,17 +416,17 @@ used as a communication channel."
     (org-map-entries
      (lambda ()
        (let* ((entry (org-element-at-point))
-	      (level (org-element-property :level entry)))
-	 (when (= level 1)
-	   (unless (org-entry-get (point) "PUBDATE")
-	     (setq msg t)
-	     (org-set-property
-	      "PUBDATE" (format-time-string
-			 (cdr org-time-stamp-formats)))))))
+	          (level (org-element-property :level entry)))
+	     (when (= level 1)
+	       (unless (org-entry-get (point) "PUBDATE")
+	         (setq msg t)
+	         (org-set-property
+	          "PUBDATE" (format-time-string
+			             (cdr org-time-stamp-formats)))))))
      nil nil 'comment 'archive)
     (when msg
       (message "Property PUBDATE added to top-level entries in %s"
-	       (buffer-file-name))
+	           (buffer-file-name))
       (sit-for 2))))
 
 (provide 'ox-rss)
