@@ -10,6 +10,9 @@
                                                                   load-file-name
                                                                 (buffer-file-name)))))
 ;; (require 'ox-rss) ; ox-rss just disappeared from nongnu elpa?
+(load-file (expand-file-name "patch-ox-html.el" (file-name-directory (if load-in-progress
+                                                                         load-file-name
+                                                                       (buffer-file-name)))))
 
 (require 'ox-icalendar) ; Workaround ox-rss using icalendar without loading it
 
@@ -95,6 +98,10 @@ directory using the org HTML publisher."
              :base-directory ,dir-exp
              :publishing-directory ,target
              :publishing-function org-html-publish-to-html
+
+             :html-link-home "/notes/"
+             :html-link-use-abs-url t
+
              :auto-sitemap t
              :sitemap-filename "index.org"
              :sitemap-title ,(format "%s" project-name)
@@ -112,14 +119,14 @@ directory using the org HTML publisher."
              :base-extension "org"
              :publishing-directory ,target
              :publishing-function org-rss-publish-to-rss
+             :exclude ".*"
+             :include ("index.org")
 
              :title ,project-name
              :html-link-home "https://shawnhoover.dev/notes/"
              :html-link-use-abs-url t
 
              :section-numbers nil
-             :exclude ".*"
-             :include ("index.org")
              :table-of-contents nil)))
 
          (org-html-preamble 'notes-html-preamble)
@@ -148,5 +155,11 @@ directory using the org HTML publisher."
 (org-publish-dir-x "notes" "build/notes" "Notes")
 
 (when nil
+  (debug-on-entry 'org-html-link)
+  (cancel-debug-on-entry 'org-html-link)
+
   (cd (concat (file-name-directory (buffer-file-name)) "/.."))
+
+  (let ((force-publish-all t))
+    (org-publish-dir-x "notes" "build/notes" "Notes"))
   )

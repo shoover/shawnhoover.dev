@@ -9,7 +9,7 @@ ifeq ($(force),)
 force := nil
 endif
 
-.PHONY: build clean build-dir build-static build-notes-orgmode serve deploy
+.PHONY: browse build build-dir build-notes-orgmode build-static clean deploy serve
 
 all: build
 
@@ -35,3 +35,6 @@ clean:
 
 serve:
 	python3 -m http.server --directory=build 8011
+
+browse:
+	open http://127.0.0.1:8011/notes
