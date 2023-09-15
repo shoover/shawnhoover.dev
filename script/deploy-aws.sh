@@ -7,8 +7,8 @@ set -x
 [[ -z "$S3_BUCKET" ]] && { echo "S3_BUCKET is required" ; exit 1; }
 [[ -z "$CF_DIST" ]] && { echo "CF_DIST is required" ; exit 1; }
 
-# It's a static static site
-TTL=604800
+# Middle ground TTL for HTML and images
+TTL=86400
 
 rm -f sync.log
 touch sync.log
