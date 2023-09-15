@@ -133,6 +133,7 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
     (:rss-extension "RSS_EXTENSION" nil org-rss-extension)
     (:rss-image-url "RSS_IMAGE_URL" nil org-rss-image-url)
     (:rss-feed-url "RSS_FEED_URL" nil nil t)
+    (:rss-title "RSS_TITLE" nil nil org-rss-title)
     (:rss-categories nil nil org-rss-categories))
   :filters-alist '((:filter-final-output . org-rss-final-function))
   :translate-alist '((headline . org-rss-headline)
@@ -331,7 +332,9 @@ as a communication channel."
 (defun org-rss-build-channel-info (info)
   "Given plist INFO build the RSS channel information."
   (let* ((system-time-locale "C")
-	     (title (org-export-data (plist-get info :title) info))
+	     (title (org-export-data (or (plist-get info :rss-title)
+                                     (plist-get info :title))
+                                 info))
 	     (email (org-export-data (plist-get info :email) info))
 	     (author (and (plist-get info :with-author)
 		              (let ((auth (plist-get info :author)))

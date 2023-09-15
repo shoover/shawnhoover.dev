@@ -65,6 +65,7 @@ inserts the subtrees from `sitemap-rss-entry'."
   (concat "#+TITLE: " title "\n"
           "#+SETUPFILE: org.txt\n"
           "#+OPTIONS: num:nil html-postamble:sitemap-postamble\n"
+          "#+DESCRIPTION: Learnings, thoughts, and references collected in my software work.\n"
           "Learnings, thoughts, and references collected in my software work.\n\n"
           (org-list-to-generic
            project-tree
@@ -125,10 +126,10 @@ directory using the org HTML publisher."
              :exclude ".*"
              :include ("index.org")
 
-             :title ,(format "shawnhoover.dev - %s" project-name)
-             :html-link-home "https://shawnhoover.dev/notes/"
+             :html-link-home "https://shawnhoover.dev/notes"
              :html-link-use-abs-url t
-             :rss-image-url "https://shawnhoover.dev/assets/icons/feed.svg"
+             :rss-title ,(format "shawnhoover.dev - %s" project-name)
+             :rss-image-url "https://shawnhoover.dev/assets/icons/apple-touch-icon.png"
 
              :section-numbers nil
              :table-of-contents nil)))
