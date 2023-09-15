@@ -103,6 +103,7 @@ directory using the org HTML publisher."
 
              :html-link-home "/notes/"
              :html-link-use-abs-url t
+             :html-home/up-format ""
 
              :auto-sitemap t
              :sitemap-filename "index.org"
