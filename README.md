@@ -29,7 +29,7 @@ publishing system. Orgmode is great. The project system is nice and
 automatically supports links between files, including converting .org links to
 .html when publishing. Sitemap and RSS functionality are more of the DIY nature,
 and kind of painful. All the details are in `Makefile` and
-`publish/publish-org-dir.el`.
+`publish/publish.el`.
 
 ## But also infrastructure
 

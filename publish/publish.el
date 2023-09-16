@@ -1,4 +1,4 @@
-;; Usage: emacs --script publish-org-dir.el [--force=t]
+;; Usage: emacs --script publish.el [--force=t]
 
 (setq force-publish-all (member "--force=t" argv))
 (defvar notes-tz "EST+5EDT")

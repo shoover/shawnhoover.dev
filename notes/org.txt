@@ -4,7 +4,7 @@
 #+AUTHOR: Shawn Hoover
 #+EMAIL: shawn@shawnhoover.dev
 
-#+STARTUP: hidestars indent overview
+#+STARTUP: hidestars indent
 #+LANGUAGE: en
 
 #+OPTIONS: H:3 toc:nil num:1 \n:nil ::t |:t ^:{} *:t TeX:t

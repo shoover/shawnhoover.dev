@@ -5,8 +5,9 @@
 
 * Background
 This blog is built as a static site using the Emacs orgmode publishing
-system[fn:1]. I'll probably write about the details eventually. For the purposes
-of this post, my main requirements were:
+system[fn:1] (see [[https://github.com/shoover/shawnhoover.dev/blob/main/publish/publish.el][publish/publish.el]]). I'll probably write about the
+details eventually. For the purposes of this post, my main
+requirements were:
 1. All posts are written in orgmode
 2. Local preview is easy with the standard org export dispatcher
 3. Deployments run in GitHub Actions and fast--under one minute

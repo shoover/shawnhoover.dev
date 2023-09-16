@@ -23,7 +23,7 @@ build-static: | build-dir
 	rsync -av --exclude ".#*" site/ build/
 
 build-notes-orgmode: | build-dir
-	emacs --script publish/publish-org-dir.el -- --force=$(force)
+	emacs --script publish/publish.el -- --force=$(force)
 
 # The deploy script needs some environment variables, e.g. `source .env_deploy_sample`.
 deploy:
