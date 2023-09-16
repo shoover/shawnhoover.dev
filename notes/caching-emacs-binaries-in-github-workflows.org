@@ -1,0 +1,98 @@
+#+title: Caching Emacs Binaries in GitHub Workflows
+#+description: Using the GitHub action cache for fun and... speed
+#+date: <2023-09-16 Sat 11:59>
+#+setupfile: org.txt
+
+* Background
+This blog is built as a static site using the Emacs orgmode publishing
+system[fn:1]. I'll probably write about the details eventually. For the purposes
+of this post, my main requirements were:
+1. All posts are written in orgmode
+2. Local preview is easy with the standard org export dispatcher
+3. Deployments run in GitHub Actions and fast--under one minute
+
+My main concern when bootstrapping the build was (3). Orgmode's publish system
+requires Emacs (and possibly some external packages), which is usually a major
+version or two behind in Linux package systems and takes several minutes to
+build/install from source.
+
+Fortunately, [[https://github.com/purcell/setup-emacs][purcell/setup-emacs]] exists and does all the heavy lifting in a
+drop-in workflow step. It uses =nix= to install pre-built binaries in about 50
+seconds per job.
+
+The challenge was to get that down to <5 seconds.
+
+* Setup
+The approach I landed on was to cache emacs and its dependencies in the GitHub
+action cache. I was new to =nix=, but after only a few minutes of reading about
+the project, I had a good feeling. Indeed, =nix= provides all the tools to make
+this easy.
+
+The first step is to check the GitHub cache. I hardcode a path in the runner's
+=$HOME= and generate a key based on the Emacs major/minor version and OS (always
+Linux here).
+
+#+begin_src yaml
+- name: Cache emacs - Get
+  id: cache-emacs
+  uses: actions/cache@v3
+  with:
+    path: /home/runner/.local/nix/store-emacs-29-1
+    key: ${{ runner.os }}-emacs-29-1
+#+end_src
+
+If we don't have the binaries cached, install with =setup-emacs=. This step just
+conditionally invokes the action from the marketplace, depending on the cache
+step result.
+
+#+begin_src yaml
+- name: Cache emacs - Miss - Install
+  uses: purcell/setup-emacs@master
+  if: steps.cache-emacs.outputs.cache-hit != 'true'
+  with:
+    version: 29.1
+#+end_src
+
+Also on a cache miss, save the emacs binary and all its dependencies to the
+known cache path. =nix-store --query --requisites= is perfect for this.
+=actions/cache= will automatically update the cache at the end of the job.
+
+#+begin_src yaml
+- name: Cache emacs - Miss - Put
+  if: steps.cache-emacs.outputs.cache-hit != 'true'
+  run: |
+    ls -l `which emacs`
+    emacs --version
+    mkdir -p $HOME/.local/nix/store-emacs-29-1
+    nix-store --query --requisites $(which emacs) | xargs -I {} rsync -av {} $HOME/.local/nix/store-emacs-29-1
+#+end_src
+
+On a cache hit, simply link the restored cache binaries back into =/nix/store= and add
+emacs to the runner's =PATH= variable.
+
+#+begin_src yaml
+- name: Cache emacs - Hit
+  if: steps.cache-emacs.outputs.cache-hit == 'true'
+  run: |
+    sudo mkdir -p /nix/store
+    sudo ln -s $HOME/.local/nix/store-emacs-29-1/* /nix/store/
+    emacs_store=$(find /nix/store -name "*-emacs-29-1")
+    test -x $emacs_store/bin/emacs
+    echo "$emacs_store/bin" >> $GITHUB_PATH
+#+end_src
+
+That's it: two marketplace actions and two steps with a couple bash commands.
+* Closing Thoughts
+This setup is easy to do and works as intended. Loading emacs from the cache
+takes 2 seconds per build.
+
+It is a bit manual and redundant, though. Ideally, =setup-emacs= would manage
+the cache internally, probably using the GitHub action tool cache. I think that
+would require a rewrite of the action from bash to JS/TS. For now, this manual
+setup works perfectly for me.
+* Footnotes
+
+[fn:1] For now. Orgmode makes me happy and the publishing system has
+some nice features around linking within the project and sitemap generation.
+However, it's also kind of a pain. I'm not ruling out changing to a simpler
+make+pandoc build down the line.

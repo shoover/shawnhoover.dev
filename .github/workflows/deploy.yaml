@@ -64,6 +64,7 @@ jobs:
         set -x
         file --dereference `which emacs`
         emacs --version
+        
         make build
 
     - name: Deploy to AWS - stage
