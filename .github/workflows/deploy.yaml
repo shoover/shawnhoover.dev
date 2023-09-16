@@ -2,6 +2,12 @@ name: Trunk-based Deployment
 on:
   push:
 
+env:
+  # Override the time zone to the one that post timestamps were
+  # written in. Orgmode assumes timestamps are in the default system
+  # zone.
+  TZ: EST+5EDT
+    
 jobs:
   deploy-stage-www:
     name: Deploy stage-www
@@ -64,13 +70,18 @@ jobs:
         set -x
         file --dereference `which emacs`
         emacs --version
-        
         make build
 
     - name: Deploy to AWS - stage
       run: |
         source .env_deploy_stage
         make deploy
+
+    - name: Upload sitemap
+      uses: actions/upload-artifact@v3
+      with:
+        name: sitemap
+        path: notes/index.org
 
     - name: Upload build
       uses: actions/upload-artifact@v3

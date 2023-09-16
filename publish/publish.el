@@ -1,7 +1,6 @@
 ;; Usage: emacs --script publish.el [--force=t]
 
 (setq force-publish-all (member "--force=t" argv))
-(defvar notes-tz "EST+5EDT")
 
 ;; Use org from the package to avoid warnings about htmlize for formatting source code.
 (require 'package)
@@ -35,16 +34,15 @@
 Includes link, title, description, and RSS properties."
   (cond ((not (directory-name-p entry))
          (with-temp-buffer
-           (org-mode)           ; Required for org-set-property to work in 9.6.9
+           (org-mode) ; Required for org-set-property to work in 9.6.9
            (let ((title (org-publish-find-title entry project))
                  (description (org-publish-find-property entry :description project 'html))
                  (date (format-time-string "%d %b %Y"
                                            (org-publish-find-date entry project)))
                  (rss-permalink (concat (file-name-sans-extension entry) ".html"))
                  (rss-pubdate (format-time-string
-                               (cdr org-time-stamp-formats)       ; "%FT%T%z"
-                               (org-publish-find-date entry project)
-                               notes-tz)))
+                               (cdr org-time-stamp-formats)
+                               (org-publish-find-date entry project))))
              (insert (format "* [[file:%s][%s]]\n%s -- %s\n"
 		                     entry
 		                     title
@@ -132,7 +130,6 @@ directory using the org HTML publisher."
              :html-link-use-abs-url t
              :rss-title ,(format "shawnhoover.dev - %s" project-name)
              :rss-image-url "https://shawnhoover.dev/assets/icons/apple-touch-icon.png"
-             :rss-tz ,notes-tz
              :section-numbers nil
              :table-of-contents nil)))
 
