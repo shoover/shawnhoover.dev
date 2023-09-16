@@ -1,6 +1,7 @@
 ;; Usage: emacs --script publish-org-dir.el [--force=t]
 
 (setq force-publish-all (member "--force=t" argv))
+(defvar notes-tz "EST+5EDT")
 
 ;; Use org from the package to avoid warnings about htmlize for formatting source code.
 (require 'package)
@@ -41,8 +42,9 @@ Includes link, title, description, and RSS properties."
                                            (org-publish-find-date entry project)))
                  (rss-permalink (concat (file-name-sans-extension entry) ".html"))
                  (rss-pubdate (format-time-string
-                               (car org-time-stamp-formats)
-                               (org-publish-find-date entry project))))
+                               (cdr org-time-stamp-formats)       ; "%FT%T%z"
+                               (org-publish-find-date entry project)
+                               notes-tz)))
              (insert (format "* [[file:%s][%s]]\n%s -- %s\n"
 		                     entry
 		                     title
@@ -130,7 +132,7 @@ directory using the org HTML publisher."
              :html-link-use-abs-url t
              :rss-title ,(format "shawnhoover.dev - %s" project-name)
              :rss-image-url "https://shawnhoover.dev/assets/icons/apple-touch-icon.png"
-
+             :rss-tz ,notes-tz
              :section-numbers nil
              :table-of-contents nil)))
 
@@ -166,6 +168,12 @@ directory using the org HTML publisher."
   (cd (concat (file-name-directory (buffer-file-name)) "/.."))
 
   (org-publish-remove-all-timestamps)
+
+  (let* ((t0 "2023-09-16 Sat 11:59"
+             ;;""
+             )
+         (t1 (org-time-string-to-time t0)))
+          (format-time-string "%a, %d %b %Y %T %z" t1))
 
   (let ((force-publish-all t))
     (org-publish-dir-x "notes" "build/notes" "Notes"))

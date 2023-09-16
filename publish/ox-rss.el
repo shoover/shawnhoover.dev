@@ -6,6 +6,7 @@
 ;; 2. Use `org-link-display-format' to parse item titles from headline links instead of
 ;;    parsing the link with a regexp.
 ;; 3. Set item isPermalink=true when it is an http/https URL.
+;; 4. Add export option RSS_TZ to specify the time zone of timestamps in PUBDATE.
 
 ;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
@@ -141,6 +142,7 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
     (:rss-image-url "RSS_IMAGE_URL" nil org-rss-image-url)
     (:rss-feed-url "RSS_FEED_URL" nil nil t)
     (:rss-title "RSS_TITLE" nil nil org-rss-title)
+    (:rss-tz "RSS_TZ" nil nil org-rss-tz)
     (:rss-categories nil nil org-rss-categories))
   :filters-alist '((:filter-final-output . org-rss-final-function))
   :translate-alist '((headline . org-rss-headline)
@@ -262,7 +264,8 @@ communication channel."
 			            (if (and pubdate0 (not (string-empty-p pubdate0)))
 			                (format-time-string
 			                 "%a, %d %b %Y %T %z"
-			                 (org-time-string-to-time pubdate0)))))
+			                 (org-time-string-to-time pubdate0)
+                             (plist-get info :rss-tz)))))
              (foo (message "RSS_TITLE: %s\nraw-value: %s\nreplacement: %s"
                            (org-element-property :RSS_TITLE headline)
                            (org-element-property :raw-value headline)
