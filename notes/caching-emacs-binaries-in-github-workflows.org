@@ -20,7 +20,7 @@ Fortunately, [[https://github.com/purcell/setup-emacs][purcell/setup-emacs]] exi
 drop-in workflow step. It uses =nix= to install pre-built binaries in about 50
 seconds per job.
 
-The challenge was to get that down to <5 seconds.
+The challenge was to get that down to a budget of 5 seconds, leaving plenty of time in a minute for runners to boot, build the site, and sync to S3.
 
 * Setup
 The approach I landed on was to cache emacs and its dependencies in the GitHub
