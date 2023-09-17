@@ -106,6 +106,13 @@ directory using the org HTML publisher."
              :html-link-home "/notes/"
              :html-link-use-abs-url t
              :html-home/up-format ""
+             :html-container "section"
+             :html-footnotes-section "<section id=\"footnotes\">
+<h2 class=\"footnotes\">%s</h2>
+<div id=\"text-footnotes\">
+%s
+</div>
+</section>"
 
              :auto-sitemap t
              :sitemap-filename "index.org"
@@ -129,6 +136,7 @@ directory using the org HTML publisher."
 
              :html-link-home "https://shawnhoover.dev/notes"
              :html-link-use-abs-url t
+
              :rss-title ,(format "shawnhoover.dev - %s" project-name)
              :rss-image-url "https://shawnhoover.dev/assets/icons/apple-touch-icon.png"
              :section-numbers nil

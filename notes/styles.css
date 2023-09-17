@@ -57,6 +57,9 @@ nav ul li:not(:first-child) {
     vertical-align: text-top;
 }
 
+section { padding-top: 0;
+          padding-bottom: 0; }
+
 /* Not Roman numerals */
 .numeral { font-family: inherit; }
 
