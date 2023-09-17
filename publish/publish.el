@@ -102,6 +102,8 @@ directory using the org HTML publisher."
              :base-directory ,dir-exp
              :publishing-directory ,target
              :publishing-function org-html-publish-to-html
+             :recursive t
+             :exclude "_.*" ; Exclude drafts, e.g. _thoughts.org, _drafts/thoughts.org
 
              :html-link-home "/notes/"
              :html-link-use-abs-url t
