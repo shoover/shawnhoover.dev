@@ -1,0 +1,6 @@
+#+title: Minimal Static Site on AWS
+#+description: 
+#+date: <2023-09-17 Sun 15:58>
+#+setupfile: org.txt
+
+(move README notes to a post)

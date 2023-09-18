@@ -1,4 +1,4 @@
-/* 4/16/2019 https://github.com/edwardtufte/tufte-css/blob/91c9c91cf9f9ac14bf6407d130f2edd4f0a66912/tufte.css */
+/* Based on 4/16/2019 https://github.com/edwardtufte/tufte-css/blob/91c9c91cf9f9ac14bf6407d130f2edd4f0a66912/tufte.css */
 
 @charset "UTF-8";
 
@@ -30,18 +30,19 @@
              font-style: normal; }
 
 /* Tufte CSS styles */
-html { font-size: 15px;
-     }
+html { font-size: 12.5px; }
 
-body { width: 87.5%;
+body { width: 84%;
        margin-left: auto;
        margin-right: auto;
-       padding-left: 12.5%;
+       padding-left: 8%;
+       padding-right: 8%;
        font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Georgia, serif;
        background-color: #fffff8;
        color: #111;
-       max-width: 1400px;
-       counter-reset: sidenote-counter; }
+       max-width: 789px; /* Narrower for reading since org doesn't generate sidenotes */
+       counter-reset: sidenote-counter;
+     }
 
 h1 { font-weight: 400;
      margin-top: 4rem;
@@ -63,6 +64,27 @@ h3 { font-style: italic;
      margin-bottom: 1.4rem;
      line-height: 1; }
 
+h4 { font-style: italic;
+     font-weight: 400;
+     font-size: 1.5rem;
+     margin-top: 1.8rem;
+     margin-bottom: 0;
+     line-height: 1; }
+
+h5 { font-style: italic;
+     font-weight: 400;
+     font-size: 1.5rem;
+     margin-top: 1.8rem;
+     margin-bottom: 0;
+     line-height: 1; }
+
+h6 { font-style: italic;
+     font-weight: 400;
+     font-size: 1.5rem;
+     margin-top: 1.8rem;
+     margin-bottom: 0;
+     line-height: 1; }
+
 hr { display: block;
      height: 1px;
      width: 55%;
@@ -78,23 +100,33 @@ p.subtitle { font-style: italic;
              display: block;
              line-height: 1; }
 
-.numeral { font-family: et-book-roman-old-style; }
+.numeral { font-family: inherit; } /* Not Roman numerals */
 
 .danger { color: red; }
 
 article { position: relative;
           padding: 5rem 0rem; }
 
-section { padding-top: 1rem;
-          padding-bottom: 1rem; }
+
+section { padding-top: 0;
+          padding-bottom: 0; }
 
 p, ol, ul { font-size: 1.4rem;
-            line-height: 2rem; }
+            line-height: 2rem;
+            text-align: justify; }
 
 p { margin-top: 1.4rem;
     margin-bottom: 1.4rem;
     padding-right: 0;
     vertical-align: baseline; }
+
+p > p { width: 45%; }
+
+ol, ul { padding-left: 1.75rem;
+         margin-left: 0;
+         overflow-wrap: break-word; }
+
+ul { list-style-type: disc; }
 
 /* Chapter Epigraphs */
 div.epigraph { margin: 5em 0; }
@@ -111,10 +143,10 @@ div.epigraph > blockquote > footer > cite { font-style: italic; }
 
 blockquote { font-size: 1.4rem; }
 
-blockquote p { width: 55%;
+blockquote p { width: 75%;
                margin-right: 40px; }
 
-blockquote footer { width: 55%;
+blockquote footer { width: 75%;
                     font-size: 1.1rem;
                     text-align: right; }
 
@@ -159,7 +191,9 @@ a:link { text-decoration: none;
          background-size: 0.05em 1px, 0.05em 1px, 1px 1px;
          background-repeat: no-repeat, no-repeat, repeat-x;
          text-shadow: 0.03em 0 #fffff8, -0.03em 0 #fffff8, 0 0.03em #fffff8, 0 -0.03em #fffff8, 0.06em 0 #fffff8, -0.06em 0 #fffff8, 0.09em 0 #fffff8, -0.09em 0 #fffff8, 0.12em 0 #fffff8, -0.12em 0 #fffff8, 0.15em 0 #fffff8, -0.15em 0 #fffff8;
-         background-position: 0% 93%, 100% 93%, 0% 93%; }
+         background-position: 0% 93%, 100% 93%, 0% 93%;
+         word-wrap: break-word;
+}
 
 @media screen and (-webkit-min-device-pixel-ratio: 0) { a:link { background-position-y: 87%, 87%, 87%; } }
 
@@ -251,10 +285,12 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
                          height: 100%; }
 
 @media (max-width: 760px) { body { width: 84%;
+                                   max-width: 84%;
                                    padding-left: 8%;
                                    padding-right: 8%; }
                             hr, section > p, section > footer, section > table { width: 100%; }
                             pre.code { width: 97%; }
+                            pre.src { padding: 0; }
                             section > ol { width: 90%; }
                             section > ul { width: 90%; }
                             figure { max-width: 90%; }
@@ -276,4 +312,57 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
                                                                    position: relative; }
                             label { cursor: pointer; }
                             div.table-wrapper, table { width: 85%; }
-                            img { max-width /*width*/: 100%; } }
+                            img { max-width /*width*/: 100%; }
+                            ul, ol { width: 92%; }
+                          }
+
+@media screen and (max-width: 500px) {
+    body { padding-left: 0%;
+           padding-right: 0%;
+           width: 97.5%; }
+    ol, ul { width: 92%; }
+    li { padding: 0.4rem 0; }
+
+    #text-table-of-contents li { width: 95%; }
+}
+
+/* orgmode tweaks */
+#preamble {
+    max-width: 90%;
+    clear:both;
+}
+
+#text-table-of-contents li {
+    padding: 0.1rem 0;
+    width: 75%; }
+
+.src { font-family: Consolas, Monaco, "Liberation Mono", Menlo, monospace;
+        font-size: 1.125rem;
+        line-height: 1.6; }
+h1 .src, h2 .src, h3 .src { font-size: 0.80em; }
+.marginnote .src, .sidenote .src { font-size: 1rem; }
+pre.src { width: 95%;
+          padding-left: 2.5%;
+          overflow-x: scroll; }
+
+/* Site header/footer elements */
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+nav ul li {
+  float: left;
+  margin-right: .6em;
+}
+nav ul li:not(:first-child) {
+    margin-top: 0; // override tufte list spacing
+}
+
+.feed_icon {
+    height: 16px;
+    width: 16px;
+    vertical-align: text-top;
+}
