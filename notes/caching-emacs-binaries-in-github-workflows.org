@@ -14,14 +14,14 @@ requirements were:
 
 My main concern when bootstrapping the build was (3). Orgmode's publish system
 requires Emacs (and possibly some external packages), which is usually a major
-version or two behind in Linux package systems and takes several minutes to
+version or two behind in Linux package managers and takes several minutes to
 build/install from source.
 
-Fortunately, [[https://github.com/purcell/setup-emacs][purcell/setup-emacs]] exists and does all the heavy lifting in a
-drop-in workflow step. It uses =nix= to install pre-built binaries in about 50
+Fortunately, [[https://github.com/purcell/setup-emacs][purcell/setup-emacs]] exists and does all the heavy lifting. A
+drop-in workflow step uses =nix= to install pre-built binaries in about 50
 seconds per job.
 
-The challenge was to get that down to a budget of 5 seconds, leaving
+The challenge was to get that down to 5 seconds or less, leaving
 plenty of time in a minute for runners to boot, build the site, and
 sync to S3.
 
@@ -31,9 +31,9 @@ action cache. I was new to =nix=, but after only a few minutes of reading about
 the project, I had a good feeling. Indeed, =nix= provides all the tools to make
 this easy.
 
-The first step is to check the GitHub cache. I hardcode a path in the runner's
-=$HOME= and generate a key based on the Emacs major/minor version and OS (always
-Linux here).
+Four steps must be added to the workflow. First, check the GitHub cache. I hardcode a path in the runner's
+=$HOME= and generate a key based on the OS (always
+Linux here) and Emacs major/minor version. This step restores the cache to the specified path.
 
 #+begin_src yaml
 - name: Cache emacs - Get
@@ -44,9 +44,9 @@ Linux here).
     key: ${{ runner.os }}-emacs-29-1
 #+end_src
 
-If we don't have the binaries cached, install with =setup-emacs=. This step just
+Second, if we don't have emacs binaries cached, install with =setup-emacs=. This step just
 conditionally invokes the action from the marketplace, depending on the cache
-step result.
+step result, installing emacs to the =nix= store in the runner.
 
 #+begin_src yaml
 - name: Cache emacs - Miss - Install
@@ -56,8 +56,7 @@ step result.
     version: 29.1
 #+end_src
 
-Also on a cache miss, save the emacs binary and all its dependencies to the
-known cache path. =nix-store --query --requisites= is perfect for this.
+Third, also on a cache miss, save the emacs binary and all its dependencies to the cache path. =nix-store --query --requisites= lists all the files we need.
 =actions/cache= will automatically update the cache at the end of the job.
 
 #+begin_src yaml
@@ -70,8 +69,8 @@ known cache path. =nix-store --query --requisites= is perfect for this.
     nix-store --query --requisites $(which emacs) | xargs -I {} rsync -av {} $HOME/.local/nix/store-emacs-29-1
 #+end_src
 
-On a cache hit, simply link the restored cache binaries back into =/nix/store= and add
-emacs to the runner's =PATH= variable.
+Fourth, on a cache hit, simply link the restored cache binaries into =/nix/store= where they expect to live and add
+emacs to the runner's =PATH=.
 
 #+begin_src yaml
 - name: Cache emacs - Hit
@@ -85,17 +84,19 @@ emacs to the runner's =PATH= variable.
 #+end_src
 
 That's it: two marketplace actions and two steps with a couple bash commands.
+
 * Closing Thoughts
-This setup is easy to do and works as intended. Loading emacs from the cache
+Caching is easy to implement for a single job and works as intended. Loading emacs from the cache
 takes 2 seconds per build.
 
-It is a bit manual and redundant, though. Ideally, =setup-emacs= would manage
-the cache internally, probably using the GitHub action tool cache. I think that
-would require a rewrite of the action from bash to JS/TS. For now, this manual
+It is a bit manual and repetitive for multiple jobs, though. Ideally, =setup-emacs= would manage
+the cache internally using the GitHub action tool cache. I think that
+would require a rewrite of the action from bash to JS/TS, though. For this job, the manual
 setup works perfectly for me.
+
 * Footnotes
 
-[fn:1] For now. Orgmode makes me happy and the publishing system has
+[fn:1] For now. Orgmode's publishing system has
 some nice features around linking within the project and sitemap generation.
-However, it's also kind of a pain. I'm not ruling out changing to a simpler
-make+pandoc build down the line.
+However, there are pain points. Templating HTML in Lisp is not fun. Generating a feed of all project files by chaining through the generated sitemap feels cumbersome and limiting. I can already imagine moving to a simpler
+pandoc-based build down the line.
