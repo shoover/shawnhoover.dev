@@ -1,6 +1,6 @@
 #+title: Cleaning up AWS Lambda functions on unsupported node.js runtimes
 #+description: Commands to make emails from AWS go away
-#+date: <2023-09-12 Tue>
+#+date: <2023-09-12 Tue 00:01>
 #+setupfile: org.txt
 
 node.js drops support for major versions about once a year. AWS will let you
