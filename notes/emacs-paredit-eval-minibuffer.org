@@ -1,0 +1,28 @@
+#+title: Emacs: Evaluating Expressions in the Minibuffer with Paredit
+#+description: A config change to make the editor DWIM
+#+date: <2023-09-23 Sat 10:18>
+#+setupfile: org.txt
+
+I've had paredit enabled in the eval expression minibuffer forever, but recently
+pressing RETURN inserts a newline instead of, you know, evaluating the
+expression. No idea what changed; maybe something weird in upgrading to Emacs 29.
+
+[[https://www.reddit.com/r/emacs/comments/101uwgd/enable_paredit_mode_for_evalexpression_mini/][r/emacs]] has a couple ideas for folks who set up paredit with =use-package=.
+
+For my .emacs setup, it goes like this.
+
+Before:
+
+#+begin_src emacs-lisp
+(add-hook 'eval-expression-minibuffer-setup-hook 'enable-paredit-mode)
+#+end_src
+
+After:
+
+#+begin_src emacs-lisp
+(add-hook 'eval-expression-minibuffer-setup-hook 'eval-minibuffer-enable-paredit-hook)
+
+(defun eval-minibuffer-enable-paredit-hook ()
+  (enable-paredit-mode)
+  (unbind-key (kbd "RET") paredit-mode-map))
+#+end_src
