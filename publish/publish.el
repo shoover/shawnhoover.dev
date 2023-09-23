@@ -67,6 +67,7 @@ inserts the subtrees from `sitemap-rss-entry'."
           "#+OPTIONS: num:nil html-postamble:sitemap-postamble\n"
           "#+DESCRIPTION: Learnings, thoughts, and references collected in my software work.\n"
           "#+HTML_HEAD: <link rel=\"me\" href=\"https://mastodon.social/@shoover\" />\n"
+          "#+HTML_CONTENT_CLASS: sitemap\n"
           "Learnings, thoughts, and references collected in my software work.\n\n"
           (org-list-to-generic
            project-tree
