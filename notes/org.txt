@@ -10,7 +10,7 @@
 #+OPTIONS: H:3 toc:nil num:1 \n:nil ::t |:t ^:{} *:t TeX:t
 # Add toc per file where appropriate: toc:2
 
-# Note: Anchor hrefs so they work for 'notes' and 'notes/index.html'.
+# Note: Anchor hrefs so they work from 'notes' and 'notes/index.html'.
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/notes/org.css" />
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/notes/tufte.css" />
 #+HTML_HEAD: <link rel="alternate" type="application/atom+xml" href="/notes/index.xml" />

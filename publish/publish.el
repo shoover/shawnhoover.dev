@@ -1,33 +1,21 @@
-;; Usage: emacs --script publish.el [--force=t]
+;; Usage: emacs --script publish.el [--force=t] [--dev=t]
 
 (setq force-publish-all (member "--force=t" argv))
+(setq notes-dev-mode (member "--dev=t" argv))
+
+(setq script-dir (file-name-directory (if load-in-progress
+                                          load-file-name
+                                        (buffer-file-name))))
 
 ;; Use org from the package to avoid warnings about htmlize for formatting source code.
 (require 'package)
 (package-initialize)
 (require 'org)
-(load-file (expand-file-name "ox-rss.el" (file-name-directory (if load-in-progress
-                                                                  load-file-name
-                                                                (buffer-file-name)))))
-;; (require 'ox-rss) ; ox-rss just disappeared from nongnu elpa?
-(load-file (expand-file-name "patch-ox-html.el" (file-name-directory (if load-in-progress
-                                                                         load-file-name
-                                                                       (buffer-file-name)))))
-
 (require 'ox-icalendar) ; Workaround ox-rss using icalendar without loading it
+(load-file (expand-file-name "ox-rss.el" script-dir))
+(load-file (expand-file-name "patch-ox-html.el" script-dir))
 
 (message "Publishing with org-mode %s" org-version)
-
-;; Something about generating the sitemap causes org-publish to prompt
-;; about file locks if another session is editing a file in the project
-;; being published. For the purposes of emacs --batch publishing, we
-;; can override the default behavior to skip the prompt and just try
-;; to take the lock.
-;; (defun ask-user-about-lock (file opponent)
-;;   "Override this standard function to always take the lock."
-;;   (message "[WARN] The publish script is taking the lock on %s previously held by %s"
-;;            file opponent)
-;;   t)
 
 (defun sitemap-rss-entry (entry style project)
   ":sitemap-format-entry hook to generate entries as subtrees to publish with ox-rss.
@@ -71,10 +59,7 @@ inserts the subtrees from `sitemap-rss-entry'."
           "Learnings, thoughts, and references collected in my software work.\n\n"
           (org-list-to-generic
            project-tree
-           (list :splice nil
-	             :istart ""
-	             :icount ""
-	             :isep "\n\n"))))
+           (list :splice nil :istart "" :icount "" :isep "\n\n"))))
 
 (defun notes-html-preamble (options)
   "<nav>
@@ -98,7 +83,8 @@ directory using the org HTML publisher."
   (let* ((dir-exp (expand-file-name dir))
          (org-publish-project-alist
           `((,project-name
-             :components ("orgfiles" "css" "rss"))
+             :components ("orgfiles" "css" "script" "rss"))
+
             ("orgfiles"
              :base-directory ,dir-exp
              :publishing-directory ,target
@@ -117,6 +103,9 @@ directory using the org HTML publisher."
 </div>
 </section>"
 
+             ,@(when notes-dev-mode
+                 '(:html-head-extra "<script src=\"/notes/reload.js\"></script>"))
+
              :auto-sitemap t
              :sitemap-filename "index.org"
              :sitemap-title ,project-name
@@ -124,11 +113,23 @@ directory using the org HTML publisher."
              ;;:sitemap-ignore-case t
              :sitemap-format-entry sitemap-rss-entry
              :sitemap-function sitemap-rss-generate-tree)
+
             ("css"
              :base-directory ,dir-exp
              :base-extension "css"
              :publishing-directory ,target
              :publishing-function org-publish-attachment)
+
+            ;; Explicitly include hot reloading in dev mode. No other scripts are needed.
+            ("script"
+             :base-directory ,dir-exp
+             :base-extension "js"
+             :exclude ".*"
+             ,@(when notes-dev-mode
+                 '(:include ("reload.js")))
+             :publishing-directory ,target
+             :publishing-function org-publish-attachment)
+
             ("rss"
              :base-directory ,dir-exp
              :base-extension "org"
@@ -182,7 +183,7 @@ directory using the org HTML publisher."
              ;;""
              )
          (t1 (org-time-string-to-time t0)))
-          (format-time-string "%a, %d %b %Y %T %z" t1))
+    (format-time-string "%a, %d %b %Y %T %z" t1))
 
   (let ((force-publish-all t))
     (org-publish-dir-x "notes" "build/notes" "Notes"))
