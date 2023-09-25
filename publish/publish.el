@@ -1,7 +1,7 @@
-;; Usage: emacs --script publish.el [--force=t] [--dev=t]
+;; Usage: emacs --script publish.el [--force=t] [--writing=t]
 
 (setq force-publish-all (member "--force=t" argv))
-(setq notes-dev-mode (member "--dev=t" argv))
+(setq notes-writing-mode (member "--writing=t" argv))
 
 (setq script-dir (file-name-directory (if load-in-progress
                                           load-file-name
@@ -103,7 +103,7 @@ directory using the org HTML publisher."
 </div>
 </section>"
 
-             ,@(when notes-dev-mode
+             ,@(when notes-writing-mode
                  '(:html-head-extra "<script src=\"/notes/reload.js\"></script>"))
 
              :auto-sitemap t
@@ -120,12 +120,12 @@ directory using the org HTML publisher."
              :publishing-directory ,target
              :publishing-function org-publish-attachment)
 
-            ;; Explicitly include hot reloading in dev mode. No other scripts are needed.
+            ;; Explicitly include hot reloading in writing mode. No other scripts are needed.
             ("script"
              :base-directory ,dir-exp
              :base-extension "js"
              :exclude ".*"
-             ,@(when notes-dev-mode
+             ,@(when notes-writing-mode
                  '(:include ("reload.js")))
              :publishing-directory ,target
              :publishing-function org-publish-attachment)

@@ -4,14 +4,14 @@
 #   make deploy
 
 # Pass force=t to force publishing all orgmode files regardless of cache status.
-# Pass dev=t to build in dev mode, i.e. enable hot reloading.
+# Pass writing=t to build in writing mode. This enables hot reloading locally.
 
 ifeq ($(force),)
 force := nil
 endif
 
-ifeq ($(dev),)
-dev := nil
+ifeq ($(writing),)
+writing := nil
 endif
 
 .PHONY: browse build build-dir build-notes-orgmode build-static clean clean-publish-cache
@@ -28,7 +28,7 @@ build-static: | build-dir
 	rsync -av --exclude ".#*" site/ build/
 
 build-notes-orgmode: | build-dir
-	emacs --script publish/publish.el -- --force=$(force) --dev=$(dev)
+	emacs --quick --script publish/publish.el -- --force=$(force) --writing=$(writing)
 
 # The deploy script needs some environment variables, e.g. `source .env_deploy_sample`.
 deploy:

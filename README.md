@@ -2,8 +2,8 @@ A static site for [my personal landing page](https://shawnhoover.dev)
 
 # Just a website
 
-The site is a bit of static HTML and a an orgmode-generated blog, plus styles
-and supporting media assets, hosted on S3 and CloudFront.
+The site is a bit of static HTML and a blog generated from orgmode files hosted
+on S3 and CloudFront.
 
 In short:
 
@@ -15,21 +15,35 @@ export AWS_SECRET_ACCESS_KEY=...
 export S3_BUCKET=...
 export CF_DIST=...
 make build
-make serve &
-curl http://127.0.0.1:8011
+open http://127.0.0.1:5000
 make deploy
 ```
 
-Emacs 28+ is also required for the build.
+Additional requirements:
+- Emacs 28+ is required to build
+- Ruby (recentish, e.g. ~3.0.2) is required to run the build server in writing
+  mode with hot reloading
 
 ## Orgmode-generated blog
 
-The "Notes" blog is generated from orgmode files using the org project
-publishing system. Orgmode is great. The project system is nice and
-automatically supports links between files, including converting .org links to
-.html when publishing. Sitemap and RSS functionality are more of the DIY nature,
-and kind of painful. All the details are in `Makefile` and
-`publish/publish.el`.
+The "Notes" blog is generated from .org files using the orgmode project
+publishing system. Orgmode publishing generates styled HTML for all .org files,
+as well as a sitemap. Internal .org file links are translated to .html as
+expected. Generating an RSS feed requires somewhat more elbow grease, but it's
+doable. See `Makefile` and `publish/publish.el` for details.
+
+## Build server and hot reloading
+
+Running the build server (`publish/server.rb`) puts the local site in writing
+mode. Upon saving any .org files in `notes/`, the server rebuilds the site and
+notifies visiting browsers to reload the page.
+
+```sh
+make serve
+open http://127.0.0.1:5000
+emacs notes/xyz.org
+# C-x C-s
+```
 
 ## But also infrastructure
 
