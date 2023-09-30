@@ -1,0 +1,101 @@
+#+title: Generating Histograms in Postgres
+#+description: Quick reference using functions date_diff and width_bin
+#+date: <2023-09-30 Sat 15:40>
+#+setupfile: org.txt
+
+It seems like half the time I'm doing ad hoc analysis with data in Postgres, I
+need a histogram of records binned by some timestamp or age. This page distills
+my typical quick uses.
+
+Note: the examples do not fill gaps in sparse data. See [[https://www.crunchydata.com/blog/easy-postgresql-time-bins][Crunchy Data: Easy
+PostgreSQL Time Bins]] for a complete solution generating histograms ready for
+plotting.
+
+* Timestamp Bins
+Postgres 14+: use =date_bin=.
+
+#+begin_src sql
+select date(date_bin('1 week'::interval, ts, current_date - '12 months'::interval)) as interval,
+       count(*) as count
+from blooms
+where ts > CURRENT_TIMESTAMP - '12 months'::interval
+group by interval
+order by interval;
+#+end_src
+
+#+begin_src tsv
+interval	count
+2023-04-07	1
+2023-04-14	2
+#+end_src
+
+Postgres 13-: use =width_bucket=, =generate_series=, and a cross join. 
+
+#+begin_src sql
+with bins as (
+    select array_agg(a) as bins
+    from generate_series(CURRENT_DATE - '12 months'::interval, CURRENT_DATE, '1 week'::interval) a
+),
+counts as (
+    select
+        width_bucket(ts, bins.bins) as bin,
+        count(*) as count
+    from blooms
+    cross join bins
+    where ts > current_date - '12 months'::interval
+    group by bin
+)
+select date(current_date - '12 months'::interval + make_interval(weeks => bin)) as interval, count
+from counts
+order by bin;
+#+end_src
+
+* Age Bins
+
+To work with deltas between timestamps at a lower level in seconds, extract
+epoch seconds and bin with =width_bucket=. 
+
+#+begin_src sql
+select
+    width_bucket(extract(epoch from ts - '2023-04-01'), 0, 3600 * 24 * 30, 24 * 30) as age_hr,
+    count(*) as count
+from blooms
+where ts > '2023-04-01'
+group by age_hr
+order by age_hr;
+#+end_src
+
+#+begin_src tsv
+age_hr	count
+217	1
+433	1
+457	1
+#+end_src
+* Setup
+Requirements:
+- Docker
+- psql, e.g. postgresql-client-16 ([[https://www.postgresql.org/download/linux/ubuntu/][Linux installation]])
+
+Start and connect to a throwaway Postgres Docker container:
+
+#+begin_src sh
+docker run --name postgres -e POSTGRES_PASSWORD=local --detach --publish 5432:5432 postgres
+psql -h localhost postgres postgres
+#+end_src
+
+Set up a table with a timestamp column:
+
+#+begin_src sql
+drop table if exists blooms;
+create table blooms (
+    plant text,
+    area text,
+    ts timestamptz
+);
+
+insert into blooms values
+    ('dogwood', 'deck', '2023-04-10'),
+    ('tulip', 'front', '2023-04-19'),
+    ('oak', 'side', '2023-04-20'),
+    ('hemlock', 'side', '2022-04-15');
+#+end_src
