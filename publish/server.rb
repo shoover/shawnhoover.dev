@@ -215,7 +215,7 @@ def run_notifier(notify_events)
     notifier = INotify::Notifier.new
 
     # Primarily watch .org sources to rebuild .html
-    notifier.watch("../notes", :modify, :recursive) do |event|
+    notifier.watch("../notes", :create, :modify, :delete, :recursive) do |event|
         puts "#{event.name} was modified"
         notify_events.push(event) if should_build(event)
     end
