@@ -24,6 +24,7 @@
 # Reference:
 # - Reference EventMachine Sinatra+WebSocket app: https://stackoverflow.com/a/43873221
 # - EventMachine docs: https://www.rubydoc.info/gems/eventmachine/EventMachine
+# - rb-inotify docs: https://www.rubydoc.info/gems/rb-inotify/0.10.1/INotify/Notifier#watch-instance_method
 
 require 'json'
 require 'set'
@@ -43,12 +44,14 @@ class PopenHandler < EM::Connection
     end
 
     def receive_data(data)
-        puts "watcher: received: #{data}"
+        puts "watcher: received: <<<#{data}>>>"
     end
 
     def unbind
-        puts "watcher: Build complete"
-        @rebuild_done.push({})
+        # In theory `get_status` includes the pid and exit code; it seems to be
+        # always zeroes.
+        puts "watcher: build completed: #{get_status}"
+        @rebuild_done.push(get_status)
     end
 end
 
@@ -79,7 +82,7 @@ class Builder
     def watcher_idle
         idle = Proc.new do |event|
             puts "watcher: idle -> building: #{event.absolute_name} (#{event.flags})"
-            backlog = Set.new(event.absolute_name)
+            backlog = Set.new([event.absolute_name])
             @rebuild_needed.push(backlog)
             watcher_building(backlog)
         end
@@ -89,7 +92,7 @@ class Builder
     # Building state: collect new notifications while monitoring for build
     # completion. If there are new notifications, trigger a rebuild immediately
     # and remain in this state. Otherwise, transition back to idle.
-    def watcher_building(last_source)
+    def watcher_building(last_sources)
         backlog = Set.new
 
         last_rebuild = Time.now
@@ -98,7 +101,7 @@ class Builder
         collector_sid = @notifications.subscribe do |event|
             # Ignore double modifications for the same file we're already building.
             elapsed = Time.now - last_rebuild
-            if event.absolute_name == last_source &&
+            if last_sources.member?(event.absolute_name) &&
                elapsed < same_file_quiesce_time
                 puts "watcher: detected redundant notification. Skipping: #{event.absolute_name}"
                 next
@@ -108,10 +111,10 @@ class Builder
             backlog << event.absolute_name
         end
 
-        completion = Proc.new do |event|
-            puts "watcher: build completed: #{event}"
+        completion = Proc.new do |status|
+            puts "watcher: build completed: #{status}"
 
-            @build_completed.push({:source => last_source})
+            @build_completed.push({:sources => last_sources, :status => status})
 
             # Unhook the subscriber in preparation to hand off control to the next state.
             @notifications.unsubscribe(collector_sid)
@@ -159,12 +162,16 @@ end
 # notifies all clients to reload.
 def websocket_run(build_completed)
     EM::WebSocket.run(:host => '127.0.0.1', :port => '5001') do |ws|
-        reload_sub = nil
+        reload_sid = nil
 
         ws.onopen do |handshake|
             puts "ws: received connection path=#{handshake.path}"
-            reload_sid = build_completed.subscribe do |event|
-                ws.send({:type => "build_complete", :source => event[:source]}.to_json)
+            reload_sid = build_completed.subscribe do |info|
+                if info[:status].success?
+                    ws.send({:type => "build_complete"}.to_json)
+                else
+                    puts "ws: build failed #{info[:status]}; skipping reloading"
+                end
             end
         end
 
@@ -206,10 +213,19 @@ end
 # Sets up a notifier to watch and send notifications to the builder.
 def run_notifier(notify_events)
     notifier = INotify::Notifier.new
-    notifier.watch("../notes", :modify) do |event|
+
+    # Primarily watch .org sources to rebuild .html
+    notifier.watch("../notes", :modify, :recursive) do |event|
         puts "#{event.name} was modified"
         notify_events.push(event) if should_build(event)
     end
+
+    # If the publish script changes, we want to rebuild the whole site
+    notifier.watch("publish.el", :modify) do |event|
+        puts "#{event.name} was modified: #{event.inspect}"
+        notify_events.push(event) if should_build(event)
+    end
+
     notifier
 end
 

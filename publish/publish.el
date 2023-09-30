@@ -1,41 +1,46 @@
 ;; Usage: emacs --script publish.el [--force=t] [--writing=t]
 
+;; Process script args.
 (setq force-publish-all (member "--force=t" argv))
 (setq notes-writing-mode (member "--writing=t" argv))
 
-(setq script-dir (file-name-directory (if load-in-progress
-                                          load-file-name
-                                        (buffer-file-name))))
-
-;; Use org from the package to avoid warnings about htmlize for formatting source code.
+;; Load orgmode from the package since that is probably more recent than the built-in.
 (require 'package)
 (package-initialize)
 (require 'org)
-(require 'ox-icalendar) ; Workaround ox-rss using icalendar without loading it
+
+;; Load local support functions.
+(setq script-dir (file-name-directory (if load-in-progress
+                                          load-file-name
+                                        (buffer-file-name))))
 (load-file (expand-file-name "ox-rss.el" script-dir))
 (load-file (expand-file-name "patch-ox-html.el" script-dir))
 
 (message "Publishing with org-mode %s" org-version)
 
+
+;;
+;; Sitemap generation. The sitemap is published to both an index page and RSS feed.
+;;
+
 (defun sitemap-rss-entry (entry style project)
-  ":sitemap-format-entry hook to generate entries as subtrees to publish with ox-rss.
-Includes link, title, description, and RSS properties."
+  "`:sitemap-format-entry' hook. Formats entries as subtrees for
+publishing to an HTML sitemap and RSS feed. Inserts a link, title,
+description, and RSS export properties."
   (cond ((not (directory-name-p entry))
          (with-temp-buffer
            (org-mode) ; Required for org-set-property to work in 9.6.9
-           (let ((title (org-publish-find-title entry project))
-                 (description (org-publish-find-property entry :description project 'html))
-                 (date (format-time-string "%d %b %Y"
-                                           (org-publish-find-date entry project)))
-                 (rss-permalink (concat (file-name-sans-extension entry) ".html"))
-                 (rss-pubdate (format-time-string
-                               (cdr org-time-stamp-formats)
-                               (org-publish-find-date entry project))))
+           (let* ((title (org-publish-find-title entry project))
+                  (description (org-publish-find-property entry :description project 'html))
+                  (date (org-publish-find-date entry project))
+                  (entry-pubdate (format-time-string "%d %b %Y" date))
+                  (rss-permalink (concat (file-name-sans-extension entry) ".html"))
+                  (rss-pubdate (format-time-string (cdr org-time-stamp-formats) date)))
              (insert (format "* [[file:%s][%s]]\n%s -- %s\n"
 		                     entry
 		                     title
                              (or description "")
-                             date))
+                             entry-pubdate))
 
              (org-set-property "RSS_PERMALINK" rss-permalink)
              (org-set-property "PUBDATE" rss-pubdate)
@@ -48,8 +53,9 @@ Includes link, title, description, and RSS properties."
 	    (t entry)))
 
 (defun sitemap-rss-generate-tree (title project-tree)
-  "`:sitemap-function' hook with basic HTML options. Directly
-inserts the subtrees from `sitemap-rss-entry'."
+  "`:sitemap-function' hook. Creates a sitemap for publishing to an HTML
+sitemap and RSS feed. Inserts HTML export properties, a subtitle, and
+preformatted subtrees from `sitemap-rss-entry'."
   (concat "#+TITLE: " title "\n"
           "#+SETUPFILE: org.txt\n"
           "#+OPTIONS: num:nil html-postamble:sitemap-postamble\n"
@@ -61,28 +67,45 @@ inserts the subtrees from `sitemap-rss-entry'."
            project-tree
            (list :splice nil :istart "" :icount "" :isep "\n\n"))))
 
-(defun notes-html-preamble (options)
+(defun sitemap-postamble (options)
+  notes-footer)
+
+
+;;
+;; HTML template
+;;
+
+(defun notes-html-preamble (info)
   "<nav>
 <ul><li><a href=\"/\">shawnhoover.dev</a></li>
 <li><a href=\"/notes\">Notes</a></li>
 </ul></nav>")
 
+(defun notes-html-postamble (info)
+  (format "<hr><p class=\"date\">Published: %s</p>%s"
+          (org-export-get-date info (plist-get info :html-metadata-timestamp-format))
+          notes-footer))
+
 (defconst notes-footer
   (concat "<hr><p><a href=\"/notes/index.xml\"><img src=\"/assets/icons/feed.svg\" class=\"feed_icon\"/> RSS</a></p>"
           "<p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by/4.0/80x15.png\" /></a> This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>.</p>"))
 
-(defun sitemap-postamble (options)
-  notes-footer)
 
-(defun org-publish-dir-x (dir target project-name)
-  "Publishes all the .org files .css files in DIR to the TARGET
-directory using the org HTML publisher."
+;;
+;; Publishing. The publish project is wrapped in a function to allow conditional
+;; inclusion of hot reloading. The project name and source/target directories
+;; are parameterized but could probably be hardcoded.
+;;
+
+(defun notes-publish (dir target)
+  "Publishes my Notes blog from sources in DIR to HTML/RSS in TARGET.
+Includes HTML hot reloading if `notes-writing-mode' is non-nil."
   (unless (file-exists-p dir)
     (error "Org dir %s does not exist" dir))
 
   (let* ((dir-exp (expand-file-name dir))
          (org-publish-project-alist
-          `((,project-name
+          `(("Notes"
              :components ("orgfiles" "css" "script" "rss"))
 
             ("orgfiles"
@@ -90,11 +113,12 @@ directory using the org HTML publisher."
              :publishing-directory ,target
              :publishing-function org-html-publish-to-html
              :recursive t
-             :exclude "_.*" ; Exclude drafts, e.g. _thoughts.org, _drafts/thoughts.org
+             :exclude "^_.*" ; Exclude drafts, e.g. _thoughts.org, _drafts/thoughts.org
 
              :html-link-home "/notes/"
              :html-link-use-abs-url t
              :html-home/up-format ""
+             :html-preamble notes-html-preamble
              :html-container "section"
              :html-footnotes-section "<section id=\"footnotes\">
 <h2 class=\"footnotes\">%s</h2>
@@ -102,15 +126,15 @@ directory using the org HTML publisher."
 %s
 </div>
 </section>"
+             :html-postamble notes-html-postamble
 
              ,@(when notes-writing-mode
                  '(:html-head-extra "<script src=\"/notes/reload.js\"></script>"))
 
              :auto-sitemap t
              :sitemap-filename "index.org"
-             :sitemap-title ,project-name
+             :sitemap-title "Notes"
              :sitemap-sort-files anti-chronologically
-             ;;:sitemap-ignore-case t
              :sitemap-format-entry sitemap-rss-entry
              :sitemap-function sitemap-rss-generate-tree)
 
@@ -141,18 +165,12 @@ directory using the org HTML publisher."
              :html-link-home "https://shawnhoover.dev/notes"
              :html-link-use-abs-url t
 
-             :rss-title ,(format "shawnhoover.dev - %s" project-name)
+             :rss-title "shawnhoover.dev - Notes"
              :rss-image-url "https://shawnhoover.dev/assets/icons/apple-touch-icon.png"
              :section-numbers nil
              :table-of-contents nil)))
 
-         (org-html-preamble 'notes-html-preamble)
-
          (org-html-metadata-timestamp-format "%d %b %Y")
-         (org-html-postamble t)
-         (org-html-postamble-format
-          (list (list "en" (concat "<hr><p class=\"date\">Published: %d</p>"
-                                   notes-footer))))
 
          (make-backup-files nil)
          (auto-save-default nil)
@@ -166,10 +184,10 @@ directory using the org HTML publisher."
     (set-language-environment "UTF-8")
 
     (message "Publishing org-mode project: %s" dir-exp)
-    (org-publish-project project-name force)))
+    (org-publish-project "Notes" force)))
 
 
-(org-publish-dir-x "notes" "build/notes" "Notes")
+(notes-publish "notes" "build/notes")
 
 (when nil
   (debug-on-entry 'org-html-link)
@@ -186,5 +204,5 @@ directory using the org HTML publisher."
     (format-time-string "%a, %d %b %Y %T %z" t1))
 
   (let ((force-publish-all t))
-    (org-publish-dir-x "notes" "build/notes" "Notes"))
+    (notes-publish "notes" "build/notes"))
   )

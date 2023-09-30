@@ -6,6 +6,7 @@
 ;; 2. Use `org-link-display-format' to parse item titles from headline links instead of
 ;;    parsing the link with a regexp.
 ;; 3. Set item isPermalink=true when it is an http/https URL.
+;; 4. Require ox-icalendar.
 
 ;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
@@ -84,6 +85,7 @@
 ;;; Code:
 
 (require 'ox-html)
+(require 'ox-icalendar)
 (declare-function url-encode-url "url-util" (url))
 
 ;;; Variables and options
