@@ -244,8 +244,8 @@ div.table-wrapper { overflow-x: auto;
 .sans { font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
         letter-spacing: .03em; }
 
-code { font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-       font-size: 1.0rem;
+code { font-family: monospace;
+       font-size: 1.2rem;
        line-height: 1.42; }
 
 .sans > code { font-size: 1.2rem; }
@@ -348,9 +348,9 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
     padding: 0.1rem 0;
     width: 75%; }
 
-.src { font-family: Consolas, Monaco, "Liberation Mono", Menlo, monospace;
-        font-size: 1.125rem;
-        line-height: 1.6; }
+.src { font-family: monospace;
+       font-size: 1.2rem;
+       line-height: 1.6; }
 h1 .src, h2 .src, h3 .src { font-size: 0.80em; }
 .marginnote .src, .sidenote .src { font-size: 1rem; }
 pre.src { width: 95%;
