@@ -134,7 +134,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
 
              :auto-sitemap t
              :sitemap-filename "index.org"
-             :sitemap-title "Notes - Software with Shawn"
+             :sitemap-title "Notes"
              :sitemap-sort-files anti-chronologically
              :sitemap-format-entry sitemap-rss-entry
              :sitemap-function sitemap-rss-generate-tree)
