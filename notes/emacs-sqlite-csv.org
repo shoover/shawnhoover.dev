@@ -1,0 +1,74 @@
+#+title: Exporting Sqlite Query Results to CSV in Emacs
+#+description: A modest extension of sqlite-mode to add direct query and export functionality
+#+date: <2023-09-30 Sat 19:23>
+#+setupfile: org.txt
+
+For ad hoc SQL analysis against Postgres, I reach for Azure Data Studio. It
+packs all the features I typically need into a slick VS Code interface.
+Occasionally, I need to crunch some joins on data available in CSV files. For
+that, I use sqlite and Emacs. Rapidly sending queries to a SQL interactive
+session does the trick most days. Still, the prompt-based interface doesn't lend
+itself to easily export results for sharing. I know I can direct sqlite3 output
+to a file, but for quick iterations I'd rather have query results pop up in an
+editor buffer immediately.
+
+Now, with sqlite3 compiled into Emacs 29, we can do just that (to check if your
+build has it, run =M-: (sqlite-available-p)=). The built in =sqlite-mode=
+provides an elisp interface to the sqlite3 API, as well as a limited database
+browser. The pieces are there to interact with sqlite in any way using elisp.
+
+I wrote a library using these pieces to directly query sqlite and display
+results in a buffer formatted as CSV.
+
+[[*Sample Setup][Sample Setup]] includes a quick reference to set up sample data to play with.
+
+* Usage
+
+To use the library, download [[https://github.com/shoover/emacs.d/blob/main/lisp/sqlite-query.el][sqlite-query.el]] and save it on your load path.
+
+Add this to your .emacs to load the extension:
+#+begin_src emacs-lisp
+(require 'sqlite-query)
+#+end_src
+
+Open a sqlite interactive session with =M-x sql-sqlite=.
+
+Note: This also works with databases opened by =M-x sqlite-mode-open-file=.
+Database selection is implicit, with preference given to the last visited
+=sqlite-mode= buffer.
+
+Put your cursor in a SQL query and run =M-x sqlite-query-paragraph-to-csv=. 
+There are additional functions to query a string or the region.
+
+#+begin_src sql
+select * from blooms limit 10;
+#+end_src
+
+The results will pop up in a temp buffer formatted as CSV. Throw the buffer away
+or run a quick =C-x C-s= to save it.
+
+#+CAPTION: A SQL query in emacs with its results formatted as CSV in a temp buffer
+[[../assets/images/notes/emacs-sqlite-csv/csv-screenshot.png]]
+
+* Sample Setup
+Create a database:
+
+#+begin_src sh
+sqlite3 test.db
+#+end_src
+
+Set up any table:
+
+#+begin_src sql
+create table blooms (
+    plant text,
+    area text,
+    ts timestamptz
+);
+
+insert into blooms values
+    ('dogwood', 'deck', '2023-04-10'),
+    ('tulip', 'front', '2023-04-19'),
+    ('oak', 'side', '2023-04-20'),
+    ('hemlock', 'side', '2022-04-15');
+#+end_src
