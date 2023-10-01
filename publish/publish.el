@@ -118,6 +118,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
              :html-link-home "/notes/"
              :html-link-use-abs-url t
              :html-home/up-format ""
+
              :html-preamble notes-html-preamble
              :html-container "section"
              :html-footnotes-section "<section id=\"footnotes\">
@@ -203,6 +204,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
          (t1 (org-time-string-to-time t0)))
     (format-time-string "%a, %d %b %Y %T %z" t1))
 
-  (let ((force-publish-all t))
+  (let ((force-publish-all t)
+        (notes-writing-mode t))
     (notes-publish "notes" "build/notes"))
   )

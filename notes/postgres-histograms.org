@@ -3,9 +3,10 @@
 #+date: <2023-09-30 Sat 15:40>
 #+setupfile: org.txt
 
-It seems like half the time I'm doing ad hoc analysis with data in Postgres, I
-need a histogram of records binned by some timestamp or age. This page distills
-my typical quick uses.
+Typically when I'm doing ad hoc analysis with data in Postgres, I need a
+histogram of records binned by some timestamp or age. This page distills my
+typical quick uses. Start at [[*Sample Setup][Sample Setup]] at the bottom if you want to set up
+sample data to play with.
 
 Note: the examples do not fill gaps in sparse data. See [[https://www.crunchydata.com/blog/easy-postgresql-time-bins][Crunchy Data: Easy
 PostgreSQL Time Bins]] for a complete solution generating histograms ready for
@@ -18,7 +19,7 @@ Postgres 14+: use =date_bin=.
 select date(date_bin('1 week'::interval, ts, current_date - '12 months'::interval)) as interval,
        count(*) as count
 from blooms
-where ts > CURRENT_TIMESTAMP - '12 months'::interval
+where ts > current_timestamp - '12 months'::interval
 group by interval
 order by interval;
 #+end_src
@@ -29,7 +30,9 @@ interval	count
 2023-04-14	2
 #+end_src
 
-Postgres 13-: use =width_bucket=, =generate_series=, and a cross join. 
+Postgres 13-: use =width_bucket=, =generate_series=, and a cross join. (Ok,
+hardcoding the start time three times is starting to bug me. How do I factor
+this better, SQL experts?)
 
 #+begin_src sql
 with bins as (
@@ -52,7 +55,7 @@ order by bin;
 
 * Age Bins
 
-To work with deltas between timestamps at a lower level in seconds, extract
+To work with deltas between timestamps at a lower level in seconds or hours, extract
 epoch seconds and bin with =width_bucket=. 
 
 #+begin_src sql
@@ -71,12 +74,12 @@ age_hr	count
 433	1
 457	1
 #+end_src
-* Setup
-Requirements:
-- Docker
-- psql, e.g. postgresql-client-16 ([[https://www.postgresql.org/download/linux/ubuntu/][Linux installation]])
 
-Start and connect to a throwaway Postgres Docker container:
+* Sample Setup
+To test the queries in this post, any Postgres server and client will do. I'm
+using Docker and psql via postgresql-client-16 ([[https://www.postgresql.org/download/linux/ubuntu/][Linux installation]]).
+
+Start and connect to a throwaway Postgres server in Docker:
 
 #+begin_src sh
 docker run --name postgres -e POSTGRES_PASSWORD=local --detach --publish 5432:5432 postgres
@@ -86,7 +89,6 @@ psql -h localhost postgres postgres
 Set up a table with a timestamp column:
 
 #+begin_src sql
-drop table if exists blooms;
 create table blooms (
     plant text,
     area text,

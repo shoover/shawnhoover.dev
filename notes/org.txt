@@ -15,5 +15,5 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/notes/tufte.css" />
 #+HTML_HEAD: <link rel="alternate" type="application/atom+xml" href="/notes/index.xml" />
 
-#+options: html5-fancy:t html-style:nil html-self-link-headlines:t
+#+options: html5-fancy:t html-style:nil
 #+html_doctype: xhtml5

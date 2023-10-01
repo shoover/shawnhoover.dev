@@ -1,0 +1,23 @@
+#+title: Exporting Sqlite Results to CSV in Emacs
+#+description: Extending sqlite-mode with missing export functionality
+#+date: <2023-09-30 Sat 19:23>
+#+setupfile: org.txt
+
+
+
+* Sample Setup
+Set up any table:
+
+#+begin_src sql
+create table blooms (
+    plant text,
+    area text,
+    ts timestamptz
+);
+
+insert into blooms values
+    ('dogwood', 'deck', '2023-04-10'),
+    ('tulip', 'front', '2023-04-19'),
+    ('oak', 'side', '2023-04-20'),
+    ('hemlock', 'side', '2022-04-15');
+#+end_src
