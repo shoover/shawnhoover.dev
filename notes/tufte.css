@@ -245,8 +245,8 @@ div.table-wrapper { overflow-x: auto;
         letter-spacing: .03em; }
 
 code { font-family: monospace;
-       font-size: 1.2rem;
-       line-height: 1.42; }
+       font-size: 1.15rem;
+       line-height: 1.4; }
 
 .sans > code { font-size: 1.2rem; }
 
@@ -349,8 +349,8 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
     width: 75%; }
 
 .src { font-family: monospace;
-       font-size: 1.2rem;
-       line-height: 1.6; }
+       font-size: 1.15rem;
+       line-height: 1.4; }
 h1 .src, h2 .src, h3 .src { font-size: 0.80em; }
 .marginnote .src, .sidenote .src { font-size: 1rem; }
 pre.src { width: 95%;
