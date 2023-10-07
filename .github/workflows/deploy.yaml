@@ -1,4 +1,11 @@
-name: Trunk-based Deployment
+# Builds the site and deploys to one of two sites depending on the branch being
+# built. If triggered on main, deploy to the main www site. Otherwise deploy to
+# stage-www.
+#
+# Ideally this would be factored into separate jobs: build, deploy stage, deploy
+# www. Here, I inline for speed. I want the entire build to be done before I
+# finish sipping my coffee.
+name: Deployment
 on:
   push:
 
@@ -9,8 +16,8 @@ env:
   TZ: EST+5EDT
     
 jobs:
-  deploy-stage-www:
-    name: Deploy stage-www
+  deploy:
+    name: Deploy to the web
 
     runs-on: ubuntu-latest
     permissions: # Needed to interact with GitHub's OIDC Token endpoint.
@@ -74,8 +81,15 @@ jobs:
         make build
 
     - name: Deploy to AWS - stage
+      if: github.ref != 'refs/heads/main'
       run: |
         source .env_deploy_stage
+        make deploy
+
+    - name: Deploy to AWS - main
+      if: github.ref == 'refs/heads/main'
+      run: |
+        source .env_deploy_main
         make deploy
 
     - name: Upload sitemap
@@ -89,35 +103,3 @@ jobs:
       with:
         name: build
         path: build
-
-  deploy-www:
-    name: Deploy www
-    if: github.ref == 'refs/heads/main'
-    needs: [deploy-stage-www]
-
-    runs-on: ubuntu-latest
-    permissions: # Needed to interact with GitHub's OIDC Token endpoint.
-      id-token: write
-      contents: read
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Download build from the staging job
-      uses: actions/download-artifact@v3
-      with:
-        name: build
-        path: build
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v3
-      with:
-        role-to-assume: arn:aws:iam::668334381016:role/shawnhoover-dev-ci-role
-        aws-region: us-east-1
-
-    - name: Deploy to AWS - main
-      run: |
-        source .env_deploy_main
-        make deploy
-        
