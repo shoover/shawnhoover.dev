@@ -92,13 +92,17 @@ jobs:
         source .env_deploy_main
         make deploy
 
+    # I don't look at the build unless there's a problem. Save the 3-7s upload
+    # time otherwise.
     - name: Upload sitemap
+      if: failure()
       uses: actions/upload-artifact@v3
       with:
         name: sitemap
         path: notes/index.org
 
     - name: Upload build
+      if: failure()
       uses: actions/upload-artifact@v3
       with:
         name: build
