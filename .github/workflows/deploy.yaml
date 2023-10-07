@@ -72,28 +72,23 @@ jobs:
         mkdir -p $HOME/.local/nix/store-emacs-29-1
         nix-store --query --requisites $(which emacs) | xargs -I {} rsync -av {} $HOME/.local/nix/store-emacs-29-1
 
-    # Save a few seconds installing htmlize
+    # Save 3s installing htmlize
     - name: Cache emacs packages
-      id: cache-emacs-packages
       uses: actions/cache@v3
       with:
-        path: /home/runner/.emacs.d/elpa
-        key: ${{ runner.os }}-emacs-packages
-   
+        path: ~/.emacs.d/elpa
+        key: emacs-packages-${{ hashFiles('script/setup-emacs.sh') }}
 
     - name: Build
       run: |
         set -x
-        file --dereference `which emacs`
-        emacs --version
-        emacs --batch --eval "(package-install 'htmlize)"
+        script/setup-emacs.sh
         make build
-
     - name: Deploy to AWS - stage
       if: github.ref != 'refs/heads/main'
       run: |
         source .env_deploy_stage
-        #  make deploy
+        make deploy
 
     - name: Deploy to AWS - main
       if: github.ref == 'refs/heads/main'
