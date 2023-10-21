@@ -1,0 +1,154 @@
+#+title: Estimating Queue Length with Little's Law
+#+description: Easy math, big perspective
+#+date: <2023-10-21 Sat 09:20>
+#+setupfile: org.txt
+
+* What we have: request rate and response time
+I'm just a simple country software engineer trying to do the best I can to make
+sense of distributed systems. In the constantly evolving effort to build in
+observability to anticipate and answer any question I or anyone on my team might
+need to answer about the dynamics of a system running in production, without
+blowing cost, performance, or mental capacity budgets, I get a ton of mileage
+out of standard application performance monitoring metrics. Requests by status
+code, errors, and response time distribution are supported out of the box by web
+frameworks, HTTP libraries, and database libraries alike, and form the core of
+many service dashboards. Simple resource or operation name tags support adequate
+disaggregation for many cases.
+
+* What we need: queue length
+But an important system property the frameworks /don't/ seem to monitor is queue
+length[fn:1]. Sometimes I need this to answer questions like:
+- Is traffic saturating the configured max concurrency of the web server? (How
+  many requests are in flight in the service?)
+- Is the service overwhelming the database with concurrent queries? (How many
+  database queries are in flight?)
+
+Could I implement this metric myself? Maybe. The frameworks/libraries probably
+provide suitable hooks if I really wanted to dig into it. But I really don't
+want to, and thankfully, I don't have to.
+
+* Enter: Math
+Luckily, John Little gifted us a simple formula that lets us approximate queue
+length from response time and request rate.
+
+Little's Law ([[https://en.wikipedia.org/wiki/Little%27s_law][wikipedia]]):
+#+begin_quote
+Little's result, theorem, lemma, law, or formula is a theorem by John Little
+which states that the long-term average number L of customers in a stationary
+system is equal to the long-term average effective arrival rate λ multiplied by
+the average time W that a customer spends in the system. Expressed algebraically
+the law is:
+
+=L = λW=
+#+end_quote
+
+The beauty of the law is it works for a system as a whole or any subsystem. So
+we can calculate the concurrency of a top level API or isolate a particular
+downstream service or database. We can calculate any one variable for any
+subsystem as long as we monitor the other two variables at that level.
+
+* Example: Server concurrency
+In the server concurrency case, say we have metrics for request rate and
+response time, and we're looking at this jump a couple hours ago:
+
+#+CAPTION: Request rate (simulated data)
+[[../assets/images/notes/littles-law/rps.svg]]
+
+#+CAPTION: Average reponse time (simulated data)
+[[../assets/images/notes/littles-law/response_time.svg]]
+
+How many requests are in flight after the increase in traffic and latency?
+
+Apply Little's Law:
+
+=mean requests in flight = mean request rate * mean response time=
+
+(Yes, mean. This is one of the rare times in monitoring where you just use the
+averages and don't worry about percentiles. Take it up with Mr. Little[fn:2].)
+
+Voila, requests in flight:
+
+#+CAPTION: Requests in flight
+[[../assets/images/notes/littles-law/requests_in_flight.svg]]
+
+* It works
+That's it. I used this in a Datadog dashboard this week. I checked a client-side
+application of Little's Law against a server-side component that did measure
+queue length, and the two matched within 1%.
+
+* Setup
+Here's the code that generated the example plots. I banged this out in under an
+hour with ChatGPT, starting with no recollectable experience with numpy or
+matplotlib. Bot-generated code worked, including implementing the formula
+(prompt: "Add a series for requests in flight using Little's Law"), /except/ it
+missed normalizing time units in the formula.
+
+#+begin_src sh
+pip3 install matplotlib numpy
+#+end_src
+
+#+begin_src python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate time values over 4 hours at 1 minute intervals
+time_values = np.arange(0, 4 * 3600, 60)
+
+# Generate request rate time-series with a jump from ~100 rps to 250 at 2 hours
+mean_rps = np.concatenate([
+    np.full(int(60 * 2), 100),
+    np.full(int(60 * 2), 250)
+])
+rps = np.random.normal(mean_rps, 10, len(time_values))
+
+# Generate average response time (milliseconds) time-series with a jump at 2 hours
+mean_response_time = np.concatenate([
+    np.full(int(60 * 2), 50),
+    np.full(int(60 * 2), 170)
+])
+response_time = np.random.normal(mean_response_time, 5, len(time_values))
+
+# Calculate requests in flight using Little's Law
+requests_in_flight = rps * (response_time / 1000)
+
+# Plot request rate
+plt.figure(figsize=(8, 5.3))
+plt.plot(time_values, rps)
+plt.ylim(ymin=0)
+plt.title("Request Rate")
+plt.xlabel("Time (s)")
+plt.ylabel("Requests per second")
+plt.grid(True)
+
+plt.savefig('rps.svg', format='svg')
+
+# Plot response time
+plt.figure(figsize=(8, 5.3))
+plt.plot(time_values, response_time)
+plt.ylim(ymin=0)
+plt.title("Response Time - Average")
+plt.xlabel("Time (s)")
+plt.ylabel("Response Time (ms)")
+plt.grid(True)
+
+plt.savefig('response_time.svg', format='svg')
+
+# Plot requests in flight
+plt.figure(figsize=(8, 5.3))
+plt.plot(time_values, requests_in_flight)
+plt.ylim(ymin=0)
+plt.title("Requests in Flight")
+plt.xlabel("Time (s)")
+plt.ylabel("Requests in Flight")
+plt.grid(True)
+
+plt.savefig('requests_in_flight.svg', format='svg')
+
+plt.close('all')
+#+end_src
+
+* Footnotes
+[fn:1] Or, at least, I haven't found the metric in the frameworks I use. 
+
+[fn:2] Actually, there is also a [[https://dspace.mit.edu/bitstream/handle/1721.1/47244/distributionalfo00keil.pdf][distributional form of Little's Law]]. Knock
+yourself out.

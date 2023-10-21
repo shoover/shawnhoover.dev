@@ -25,6 +25,7 @@
 ;; TODO:
 ;; - Normalize and namespace all functions and variables
 ;; - Debug/log the background process
+;; - Build images and styles
 
 (require 'cl) ; lexical-let
 (require 'websocket)
