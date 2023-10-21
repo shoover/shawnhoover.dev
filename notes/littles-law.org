@@ -77,11 +77,15 @@ application of Little's Law against a server-side component that did measure
 queue length, and the two matched within 1%.
 
 * Setup
-Here's the code that generated the example plots. I banged this out in under an
-hour with ChatGPT, starting with no recollectable experience with numpy or
-matplotlib. Bot-generated code worked, including implementing the formula
-(prompt: "Add a series for requests in flight using Little's Law"), /except/ it
-missed normalizing time units in the formula.
+Aside: I wrote the following code to generate example plots with the help of
+ChatGPT. The code took under an hour to write and tune. Not bad considering I
+started with minimal Python experience, no experience with numpy or matplotlib,
+and have only used ChatGPT for coding [[https://github.com/shoover/shawnhoover.dev/blob/main/publish/server.el][once before]]. Starting from scratch
+would've taken me 2-3 hours, and I probably wouldn't have bothered for throwaway
+data for a blog post. Bot-generated code required few and terse prompting. It
+worked as expected, including implementing the formula (prompt: "Add a series
+for requests in flight using Little's Law"), /except/ it missed normalizing time
+units in the formula.
 
 #+begin_src sh
 pip3 install matplotlib numpy
@@ -90,9 +94,10 @@ pip3 install matplotlib numpy
 #+begin_src python
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 # Generate time values over 4 hours at 1 minute intervals
-time_values = np.arange(0, 4 * 3600, 60)
+time_values = np.arange(0, 4 * 60)
 
 # Generate request rate time-series with a jump from ~100 rps to 250 at 2 hours
 mean_rps = np.concatenate([
@@ -114,9 +119,10 @@ requests_in_flight = rps * (response_time / 1000)
 # Plot request rate
 plt.figure(figsize=(8, 5.3))
 plt.plot(time_values, rps)
+plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(15))
 plt.ylim(ymin=0)
 plt.title("Request Rate")
-plt.xlabel("Time (s)")
+plt.xlabel("Time (minutes)")
 plt.ylabel("Requests per second")
 plt.grid(True)
 
@@ -125,9 +131,10 @@ plt.savefig('rps.svg', format='svg')
 # Plot response time
 plt.figure(figsize=(8, 5.3))
 plt.plot(time_values, response_time)
+plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(15))
 plt.ylim(ymin=0)
 plt.title("Response Time - Average")
-plt.xlabel("Time (s)")
+plt.xlabel("Time (minutes)")
 plt.ylabel("Response Time (ms)")
 plt.grid(True)
 
@@ -136,9 +143,10 @@ plt.savefig('response_time.svg', format='svg')
 # Plot requests in flight
 plt.figure(figsize=(8, 5.3))
 plt.plot(time_values, requests_in_flight)
+plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(15))
 plt.ylim(ymin=0)
 plt.title("Requests in Flight")
-plt.xlabel("Time (s)")
+plt.xlabel("Time (minutes)")
 plt.ylabel("Requests in Flight")
 plt.grid(True)
 
@@ -146,6 +154,9 @@ plt.savefig('requests_in_flight.svg', format='svg')
 
 plt.close('all')
 #+end_src
+
+#+RESULTS:
+: None
 
 * Footnotes
 [fn:1] Or, at least, I haven't found the metric in the frameworks I use. 
