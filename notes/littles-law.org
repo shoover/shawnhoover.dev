@@ -116,40 +116,24 @@ response_time = np.random.normal(mean_response_time, 5, len(time_values))
 # Calculate requests in flight using Little's Law
 requests_in_flight = rps * (response_time / 1000)
 
-# Plot request rate
-plt.figure(figsize=(8, 5.3))
-plt.plot(time_values, rps)
-plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(15))
-plt.ylim(ymin=0)
-plt.title("Request Rate")
-plt.xlabel("Time (minutes)")
-plt.ylabel("Requests per second")
-plt.grid(True)
+def plot_non_negative_metric_over_minutes(time_values, y_values, title, ylabel):
+    plt.figure(figsize=(9.0, 6.0)).patch.set_facecolor('#fffff8')
+    plt.gca().set_facecolor('#fffff8')
+    plt.plot(time_values, y_values, color="#111")
+    plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(15))
+    plt.ylim(ymin=0)
+    plt.title(title)
+    plt.xlabel("Time (minutes)")
+    plt.ylabel(ylabel)
+    plt.grid(True)
 
+plot_non_negative_metric_over_minutes(time_values, rps, "Request Rate", "Requests per second")
 plt.savefig('rps.svg', format='svg')
 
-# Plot response time
-plt.figure(figsize=(8, 5.3))
-plt.plot(time_values, response_time)
-plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(15))
-plt.ylim(ymin=0)
-plt.title("Response Time - Average")
-plt.xlabel("Time (minutes)")
-plt.ylabel("Response Time (ms)")
-plt.grid(True)
-
+plot_non_negative_metric_over_minutes(time_values, response_time, "Response Time - Average", "Response Time (ms)")
 plt.savefig('response_time.svg', format='svg')
 
-# Plot requests in flight
-plt.figure(figsize=(8, 5.3))
-plt.plot(time_values, requests_in_flight)
-plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(15))
-plt.ylim(ymin=0)
-plt.title("Requests in Flight")
-plt.xlabel("Time (minutes)")
-plt.ylabel("Requests in Flight")
-plt.grid(True)
-
+plot_non_negative_metric_over_minutes(time_values, requests_in_flight, "Requests in Flight", "Requests in Flight")
 plt.savefig('requests_in_flight.svg', format='svg')
 
 plt.close('all')
