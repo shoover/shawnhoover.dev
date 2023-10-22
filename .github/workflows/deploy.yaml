@@ -17,7 +17,7 @@ env:
     
 jobs:
   deploy:
-    name: Deploy to the web
+    name: Ship it. Ship it all.
 
     runs-on: ubuntu-latest
     permissions: # Needed to interact with GitHub's OIDC Token endpoint.
