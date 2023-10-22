@@ -111,7 +111,7 @@ mean_response_time = np.concatenate([
     np.full(int(60 * 2), 50),
     np.full(int(60 * 2), 170)
 ])
-response_time = np.random.normal(mean_response_time, 5, len(time_values))
+response_time = np.random.normal(mean_response_time, 10, len(time_values))
 
 # Calculate requests in flight using Little's Law
 requests_in_flight = rps * (response_time / 1000)
