@@ -1,0 +1,9 @@
+#+title: Smash Extra Newlines
+#+date: <2023-10-29 Sun 12:50>
+#+setupfile: org.txt
+
+A beginning.
+
+A couple spaces.
+
+And an end.
