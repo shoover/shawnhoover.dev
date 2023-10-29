@@ -1,0 +1,51 @@
+# Ingests posts via IMAP.
+name: Email Ingestion
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [email_received]
+
+env:
+  # Override the time zone to the one that post timestamps are authored in
+  # locally. Orgmode assumes timestamps are in the default system zone.
+  TZ: America/Indiana/Indianapolis
+
+jobs:
+  deploy:
+    name: It's the email, the email, what-what, the email
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write           # Allowing pushing branches
+      pull-requests: write      # Allow creating PRs to review and merge new posts
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - name: Setup
+        run: |
+          # Configure git for creating one branch from main per email post.
+          git config --global user.name 'Shawn Hoover'
+          git config --global user.email 'shoover@users.noreply.github.com'
+          git fetch -v --depth=1 origin main
+          git branch main origin/main
+
+          mkdir -p $HOME/.local/bin
+          curl -L https://github.com/jgm/pandoc/releases/download/3.1.9/pandoc-3.1.9-linux-amd64.tar.gz | tar xvz --strip-components 1 -C $HOME/.local
+          alias pandoc="$HOME/.local/bin/pandoc"
+
+          pip install -r requirements.txt
+      - name: Ingest
+        env:
+          IMAP_USERNAME: ${{ secrets.IMAP_USERNAME }}
+          IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
+          IMAP_FOLDER: ${{ secrets.IMAP_FOLDER }}
+          ALLOWED_SENDERS: ${{ secrets.ALLOWED_SENDERS }}
+
+          # Needed for `gh pr create`
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          python script/ingest-email.py
