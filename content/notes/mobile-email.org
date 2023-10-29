@@ -1,0 +1,9 @@
+#+title: Mobile Email
+#+date: <2023-10-29 Sun 12:53>
+#+setupfile: org.txt
+
+Hello kitty. 
+
+/Cozy./
+
+[[file:../content/assets/images/notes/mobile-email/IMG_6191.jpg]]
