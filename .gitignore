@@ -2,8 +2,6 @@
 .env_secrets
 
 build
-notes/index.org
-notes/theindex.org
-notes/theindex.inc
+content/notes/index.org
 
 .bundle

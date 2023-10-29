@@ -98,10 +98,10 @@ prevent concurrent builds if files are saved in quick succession.")
 
 (defun notes-project-buffer-save-hook ()
   "Watches for project file changes and triggers a rebuild.
-TODO: Scope to project directory. Watch *.css and publish.el."
+TODO: Watch *.css and publish.el."
   (let ((buffer-file (buffer-file-name)))
     (when (and buffer-file
-               (string-prefix-p (expand-file-name "notes" notes-root-dir)
+               (string-prefix-p (expand-file-name "content/notes" notes-root-dir)
                                 (file-name-directory (buffer-file-name)))
                (string-match "\\.org$" buffer-file))
 

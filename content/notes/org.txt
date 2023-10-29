@@ -11,8 +11,8 @@
 # Add toc per file where appropriate: toc:2
 
 # Note: Anchor hrefs so they work from 'notes' and 'notes/index.html'.
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/notes/org.css" />
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/notes/tufte.css" />
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/assets/styles/org.css" />
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/assets/styles/tufte.css" />
 #+HTML_HEAD: <link rel="alternate" type="application/atom+xml" href="/notes/index.xml" />
 
 #+options: html5-fancy:t html-style:nil

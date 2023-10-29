@@ -7,7 +7,7 @@ set -x
 [[ -z "$S3_BUCKET" ]] && { echo "S3_BUCKET is required" ; exit 1; }
 [[ -z "$CF_DIST" ]] && { echo "CF_DIST is required" ; exit 1; }
 
-# Middle ground TTL for HTML and images
+# Middle ground TTL for HTML and assets
 TTL=86400
 
 rm -f sync.log
@@ -18,6 +18,7 @@ touch sync.log
 # --size-only for text files would skip nominal CSS changes.
 aws s3 sync build s3://$S3_BUCKET \
     --exclude 'assets/*' \
+    --include 'assets/styles/*' \
     --delete \
     --no-progress \
     --cache-control max-age=$TTL \
@@ -29,8 +30,9 @@ TARGET_DIR=build
 find ${TARGET_DIR} -name index.html | egrep -v "${TARGET_DIR}/index.html" | sed "s|^${TARGET_DIR}/||" | xargs -I{} -n1 dirname {} | xargs -I{} -n1 aws s3 cp ${TARGET_DIR}/{}/index.html s3://${S3_BUCKET}/{} --cache-control max-age=${TTL} --content-type text/html \
   | tee --append sync.log
 
-# Move assets
+# Sync assets
 aws s3 sync build/assets s3://$S3_BUCKET/assets \
+    --exclude 'assets/styles/*' \
     --delete \
     --size-only \
     --no-progress \

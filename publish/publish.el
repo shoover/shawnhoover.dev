@@ -106,7 +106,8 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
   (let* ((dir-exp (expand-file-name dir))
          (org-publish-project-alist
           `(("Notes"
-             :components ("orgfiles" "css" "script" "rss"))
+             :components ("orgfiles" ;; "css"
+                          "script" "rss"))
 
             ("orgfiles"
              :base-directory ,dir-exp
@@ -139,11 +140,11 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
              :sitemap-format-entry sitemap-rss-entry
              :sitemap-function sitemap-rss-generate-tree)
 
-            ("css"
-             :base-directory ,dir-exp
-             :base-extension "css"
-             :publishing-directory ,target
-             :publishing-function org-publish-attachment)
+            ;; ("css"
+            ;;  :base-directory ,dir-exp
+            ;;  :base-extension "css"
+            ;;  :publishing-directory ,target
+            ;;  :publishing-function org-publish-attachment)
 
             ;; Explicitly include hot reloading in writing mode. No other scripts are needed.
             ("script"
@@ -188,7 +189,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
     (org-publish-project "Notes" force)))
 
 
-(notes-publish "notes" "build/notes")
+(notes-publish "content/notes" "build/notes")
 
 (when nil
   (debug-on-entry 'org-html-link)
@@ -206,5 +207,5 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
 
   (let ((force-publish-all t)
         (notes-writing-mode t))
-    (notes-publish "notes" "build/notes"))
+    (notes-publish "content/notes" "build/notes"))
   )

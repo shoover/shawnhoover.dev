@@ -25,7 +25,8 @@ build-dir:
 	mkdir -p build/
 
 build-static: | build-dir
-	rsync -av --exclude ".#*" site/ build/
+	rsync -av --exclude ".#*" content/static/* build/
+	rsync -av --exclude ".#*" content/assets/* build/assets/
 
 build-notes-orgmode: | build-dir
 	emacs --quick --script publish/publish.el -- --force=$(force) --writing=$(writing)

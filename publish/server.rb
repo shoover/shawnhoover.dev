@@ -211,11 +211,11 @@ class NotifyHandler < EM::Connection
 end
 
 # Sets up a notifier to watch and send notifications to the builder.
-def run_notifier(notify_events)
+def run_notifier(notify_events, notes_dir)
     notifier = INotify::Notifier.new
 
     # Primarily watch .org sources to rebuild .html
-    notifier.watch("../notes", :create, :modify, :delete, :recursive) do |event|
+    notifier.watch(notes_dir, :create, :modify, :delete, :recursive) do |event|
         puts "#{event.name} was modified"
         notify_events.push(event) if should_build(event)
     end
@@ -229,6 +229,8 @@ def run_notifier(notify_events)
     notifier
 end
 
+notes_dir = "../content/notes"
+
 puts "Entering the event loop"
 
 EM.run do
@@ -238,7 +240,7 @@ EM.run do
 
     # IO components:
     # 1. File system monitoring
-    notifier = run_notifier(notify_events)
+    notifier = run_notifier(notify_events, notes_dir)
     EM.watch(notifier.to_io, NotifyHandler, notifier) do |c|
         c.notify_readable = true
     end
