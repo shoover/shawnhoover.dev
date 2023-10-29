@@ -1,0 +1,32 @@
+# Ingests posts via IMAP.
+name: Email Ingestion
+on: workflow_dispatch
+
+env:
+  # Override the time zone to the one that post timestamps are authored in
+  # locally. Orgmode assumes timestamps are in the default system zone.
+  TZ: EST+5EDT
+
+jobs:
+  deploy:
+    name: It's the email, the email, what-what, the email
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      #pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Ingest
+        env:
+          IMAP_USERNAME: ${{ secrets.IMAP_USERNAME }}
+          IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
+          IMAP_FOLDER: ${{ secrets.IMAP_FOLDER }}
+          ALLOWED_SENDERS: ${{ secrets.ALLOWED_SENDERS }}
+        run: |
+          git config --global user.name 'Shawn Hoover'
+          git config --global user.email 'shoover@users.noreply.github.com'
+          pip3 install beautifulsoup4 pendulum
+          sudo apt install pandoc
+          python3 script/ingest-email.py
