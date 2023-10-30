@@ -178,7 +178,7 @@ def cmd(cmd):
 def check_in(subject, notes_dest, img_dest):
     commit_message = f"Post: {subject}"
     branch = f"email/{slug(subject)}"
-    cmd(f"git checkout -b {branch} main")
+    cmd(f"git checkout -b {branch} origin/main")
     cmd(f"git add {notes_dest}")
     if post['images']:
         cmd(f"git add {img_dest}")

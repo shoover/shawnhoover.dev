@@ -31,7 +31,6 @@ jobs:
           git config --global user.name 'Shawn Hoover'
           git config --global user.email 'shoover@users.noreply.github.com'
           git fetch -v --depth=1 origin main
-          git branch main origin/main
 
           mkdir -p $HOME/.local/bin
           curl -L https://github.com/jgm/pandoc/releases/download/3.1.9/pandoc-3.1.9-linux-amd64.tar.gz | tar xvz --strip-components 1 -C $HOME/.local
