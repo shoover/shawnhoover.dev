@@ -1,0 +1,38 @@
+
+Create and deploy a Cloudflare Email Worker.
+
+#+begin_src sh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+nvm install node
+nvm use node
+
+npm create cloudflare@latest
+cd PROJECT
+npm install wrangler --save-dev
+
+npx wrangler secret put ALLOWED_SENDERS
+npx wrangler secret put ALLOWED_FORWARDED_FOR
+npx wrangler secret put ALLOWED_FORWARDER_PATTERN
+npx wrangler secret put GITHUB_TOKEN
+npx wrangler secret put OWNER_REPO
+
+npx wrangler deploy
+
+# Manually set up an email route to the worker.
+
+npx wrangler tail --format=pretty
+#+end_src
+
+
+Test posting to the GitHub API:
+
+#+begin_src sh
+echo curl --request POST \
+--url "https://api.github.com/repos/shoover/shawnhoover.dev/dispatches" \
+--header "Authorization: Bearer ${GITHUB_TOKEN}" \
+--header "X-GitHub-Api-Version: 2022-11-28" \
+--data '{
+  "event_type": "email_received",
+  "client_payload": {}
+}'
+#+end_src
