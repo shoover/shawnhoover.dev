@@ -1,0 +1,14 @@
+#+title: Re: Checking the email
+#+date: <2023-10-31 Tue 22:04>
+#+setupfile: org.txt
+
+Hi
+
+On Tue, Oct 31, 2023 at 10:02 PM Shawn Hoover
+<[[mailto:shawn.hoover@gmail.com][shawn.hoover@gmail.com]]> wrote:
+
+#+begin_quote
+
+Hi
+
+#+end_quote
