@@ -1,12 +1,14 @@
 # "Checking the email!"
 #
-# Pulls unread messages via IMAP, converts each to a post, and pushes to a
-# branch.
+# Pulls unread messages via IMAP, converts each to a post, and pushes each to a
+# separate branch and PR. Multiple emails/branches are processed, but only the
+# last one will be deployed automatically.
 #
 # Requirements:
-# - pip install beautifulsoup4 pendulum
+# - pip install -r requirements.txt
 # - pandoc on the PATH
-# - Environment variables: IMAP_USERNAME, IMAP_PASSWORD, IMAP_FOLDER, ALLOWED_SENDERS
+# - Environment variables: IMAP_USERNAME, IMAP_PASSWORD, IMAP_FOLDER,
+#   ALLOWED_SENDERS (comma-separated)
 
 from bs4 import BeautifulSoup
 import email
@@ -182,7 +184,7 @@ def check_in(subject, notes_dest, img_dest):
     cmd(f"git add {notes_dest}")
     if post['images']:
         cmd(f"git add {img_dest}")
-    cmd(f'git commit -m "{commit_message}"')
+    cmd(f'git commit -m "{commit_message}\n\n- See https://stage-www.shawnhoover.dev/notes"')
     cmd(f"git push origin {branch}")
     cmd(f"gh pr create --assignee shoover --base main --fill")
 

@@ -1,4 +1,12 @@
 
+TODO:
+- Check ARC-Authentication-Results dkim=pass spf=pass dmarc=pass in the ingest
+  workflow
+- Find a way to trigger deploy after pushing from ingest
+  - GitHub will not automatically trigger a branch build if you pushed from a
+    workflow. Workaround: push using a separate token.
+  - Would calling the workflow work?
+
 Create and deploy a Cloudflare Email Worker.
 
 #+begin_src sh

@@ -1,4 +1,8 @@
-# Ingests posts via IMAP.
+# Ingests posts via IMAP. The resulting posts are pushed to a branch and
+# deployed to stage.
+#
+# Deploy is called explicitly because GitHub will not implicitly trigger a job
+# from a branch pushed from another job.
 name: Email Ingestion
 on:
   workflow_dispatch:
@@ -7,27 +11,32 @@ on:
 
 env:
   # Override the time zone to the one that post timestamps are authored in
-  # locally. Orgmode assumes timestamps are in the default system zone.
+  # locally. Orgmode assumes timestamps are in the default system zone. This one
+  # is formatted for Python.
   TZ: America/Indiana/Indianapolis
 
 jobs:
-  deploy:
+  ingest:
     name: It's the email, the email, what-what, the email
     runs-on: ubuntu-latest
     permissions:
       contents: write           # Allowing pushing branches
       pull-requests: write      # Allow creating PRs to review and merge new posts
 
+    outputs:
+      # Output the branch of the ingested post to use in the deploy job.
+      ingested_ref: ${{ steps.ingest.outputs.ingested_ref }}
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.10' # I had some trouble installing pendulum in 3.12.
           cache: 'pip'
       - name: Setup
         run: |
-          # Configure git for creating one branch from main per email post.
+          # Configure git for creating one branch from/PR to main per email post.
           git config --global user.name 'Shawn Hoover'
           git config --global user.email 'shoover@users.noreply.github.com'
           git fetch -v --depth=1 origin main
@@ -37,7 +46,8 @@ jobs:
           alias pandoc="$HOME/.local/bin/pandoc"
 
           pip install -r requirements.txt
-      - name: Ingest
+      - id: ingest
+        name: Ingest
         env:
           IMAP_USERNAME: ${{ secrets.IMAP_USERNAME }}
           IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
@@ -48,3 +58,12 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           python script/ingest-email.py
+          ingested_ref=$(git rev-parse --abbrev-ref HEAD)
+          echo "ingested_ref=$ingested_ref" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Here comes an email!
+    needs: ingest  
+    uses: ./.github/workflows/deploy.yml
+    with:
+      deploy_ref: ${{ needs.ingest.outputs.ingested_ref }}

@@ -2,19 +2,31 @@
 # built. If triggered on main, deploy to the main www site. Otherwise deploy to
 # stage-www.
 #
+# workflow_call is supported to the job reusable from email ingestion. In the
+# call scenario, the `deploy_ref` input is required to select the branch to build.
+#
 # Ideally this would be factored into separate jobs: build, deploy stage, deploy
 # www. Here, I inline for speed. I want the entire build to be done before I
 # finish sipping my coffee.
 name: Deployment
 on:
   push:
+  workflow_call:
+    inputs:
+      # Branch to build when reusing the workflow.
+      deploy_ref:
+        required: true
+        type: string
 
 env:
   # Override the time zone to the one that post timestamps were
   # written in. Orgmode assumes timestamps are in the default system
   # zone.
   TZ: EST+5EDT
-    
+
+  # The branch to deploy.
+  DEPLOY_REF: ${{ inputs.deploy_ref || github.ref }}
+
 jobs:
   deploy:
     name: Ship it. Ship it all.
@@ -27,6 +39,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        ref: ${{ env.DEPLOY_REF }}
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
       with:
@@ -85,13 +99,13 @@ jobs:
         script/setup-emacs.sh
         make build
     - name: Deploy to AWS - stage
-      if: github.ref != 'refs/heads/main'
+      if: env.DEPLOY_REF != 'refs/heads/main'
       run: |
         source .env_deploy_stage
         make deploy
 
     - name: Deploy to AWS - main
-      if: github.ref == 'refs/heads/main'
+      if: env.DEPLOY_REF == 'refs/heads/main'
       run: |
         source .env_deploy_main
         make deploy
