@@ -101,13 +101,13 @@ jobs:
     - name: Deploy to AWS - stage
       if: env.DEPLOY_REF != 'refs/heads/main'
       run: |
-        source .env_deploy_stage
+        source infra/.env_deploy_stage
         make deploy
 
     - name: Deploy to AWS - main
       if: env.DEPLOY_REF == 'refs/heads/main'
       run: |
-        source .env_deploy_main
+        source infra/.env_deploy_main
         make deploy
 
     # I don't look at the build unless there's a problem. Save the 3-7s upload
