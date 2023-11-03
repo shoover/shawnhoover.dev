@@ -92,8 +92,7 @@ prevent concurrent builds if files are saved in quick succession.")
   (message "Rebuilding for file %s" buffer-file)
   (let ((default-directory notes-root-dir))
     (setq notes-publish-process
-          (start-process "notes-publish" "*notes-publish*" "emacs"
-                         "--quick" "--script" "publish/publish.el" "--" "--writing=t")))
+          (start-process "notes-publish" "*notes-publish*" "make" "writing=t")))
   (set-process-sentinel notes-publish-process (make-rebuild-site-sentinel buffer-file)))
 
 (defun notes-project-buffer-save-hook ()

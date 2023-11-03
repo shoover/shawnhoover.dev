@@ -32,6 +32,7 @@ find ${TARGET_DIR} -name index.html | egrep -v "${TARGET_DIR}/index.html" | sed 
 
 # Sync assets
 aws s3 sync build/assets s3://$S3_BUCKET/assets \
+    --exclude 'assets/ext/*' \
     --exclude 'assets/styles/*' \
     --delete \
     --size-only \

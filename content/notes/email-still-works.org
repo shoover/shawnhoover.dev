@@ -9,21 +9,19 @@ It's clear that email has become an essential part of daily
 communication. And whether you're submitting a job application or
 staying in touch with a loved one, your emails should be safe and
 secure.
+--- [[https://blog.google/products/gmail/gmail-security-authentication-spam-protection/][New Gmail protections for a safer, less spammy inbox]]
 #+end_quote
 
---- [[https://blog.google/products/gmail/gmail-security-authentication-spam-protection/][New
-Gmail protections for a safer, less spammy inbox]]
-
 Email remains king of work communications, despite the rise of
-Slack/Teams. I am surprised by how much less I use email for
+Slack/Teams. I am surprised by how much less I use email for
 interpersonal communications than I did a decade ago (back then I didn't
 think I would ever take to texting), but it remains indispensable for
 interacting with SaaS. It's a little odd how little spam shows up in my
 inbox, or even my spam folder---I'll take it, and if this effort cuts
 down on the spammy product newsletters that get through, all the better.
 
-Not to bury the lede, but I really like having the option to /post/ via
-email. I miss Posterous. I dig that GitHub supports PR comments via
-email. I like the concept so much that I wrote code to set it up on this
-“static” blog (more of a polyglot playground at this point). This is the
-inaugural post via email. Details to come.
+Not to bury the lede, but I really like having the option to /post/ via email. I
+miss Posterous. I dig that GitHub supports PR comments via email. I like the
+concept so much that I wrote code to set it up on this static site (though it's
+turning into more of a polyglot playground). This is the inaugural post via
+email. Details to come.

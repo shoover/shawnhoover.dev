@@ -88,7 +88,7 @@ preformatted subtrees from `sitemap-rss-entry'."
 
 (defconst notes-footer
   (concat "<hr><p><a href=\"/notes/index.xml\"><img src=\"/assets/icons/feed.svg\" class=\"feed_icon\"/> RSS</a></p>"
-          "<p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by/4.0/80x15.png\" /></a> This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>.</p>"))
+          "<p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"/assets/images/cca4-80x15.png\" /></a> This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>.</p>"))
 
 
 ;;
