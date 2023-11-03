@@ -9,6 +9,13 @@
 # - pandoc on the PATH
 # - Environment variables: IMAP_USERNAME, IMAP_PASSWORD, IMAP_FOLDER,
 #   ALLOWED_SENDERS (comma-separated)
+#
+# To test offline:
+# 1. Go to Cloudflare, Email Routing, Email Workers, and disable the route.
+# 2. Send a test email.
+# 3. source .env_secrets; unset GITHUB_TOKEN
+# 4. python script/ingest_email.py
+
 
 from bs4 import BeautifulSoup
 import email
@@ -179,14 +186,18 @@ def cmd(cmd):
 # Adds all post files to git and pushes to a branch.
 def check_in(subject, notes_dest, img_dest):
     commit_message = f"Post: {subject}"
-    branch = f"email/{slug(subject)}"
+    basename = slug(subject)
+    branch = f"email/{basename}"
     cmd(f"git checkout -b {branch} origin/main")
     cmd(f"git add {notes_dest}")
     if post['images']:
         cmd(f"git add {img_dest}")
-    cmd(f'git commit -m "{commit_message}\n\n- See https://stage-www.shawnhoover.dev/notes"')
+    cmd(f'git commit -m "{commit_message}"')
     cmd(f"git push origin {branch}")
-    cmd(f"gh pr create --assignee shoover --base main --fill")
+    cmd(f"""gh pr create --assignee shoover --base main \
+      --title '{commit_message}' \
+      --body '- https://github.com/shoover/shawnhoover.dev/blob/{branch}/content/notes/{basename}.org
+- https://stage-www.shawnhoover.dev/notes/{basename}.html'""")
 
 
 #
