@@ -1,0 +1,175 @@
+#+title: Deploying a Static Site to AWS (in 2021-2023)
+#+description: Steps to bootstrap a site on AWS with HTTPS
+#+date: <2023-11-04 Sat 10:49>
+#+setupfile: org.txt
+
+/Editor's note: This note is the original readme for this site's GitHub repo
+when I created the site in 2021 and explored a minimal, mostly automated,
+self-managed, serverless setup with HTTPS. Now that the site has grown a
+generator, I'm pulling the raw static infra information out to a dedicated
+page./
+
+* Just a website
+The site itself is 50 lines of HTML, plus styles and supporting media
+assets, hosted on S3 and CloudFront.
+
+* But also infrastructure
+And then there's the 200 lines of YAML, because what's a cloud-era project
+without a 1:4 ratio of content development to infrastructure work? This is
+roughly the minimum to spin up a static site on S3 and CloudFront with https. It
+looks like a lot for "just a website," but compared to running a server, I'd say
+it's similar effort to set up; and cheaper and more secure to run long term.
+Compared to using any SaaS provider, it's more work to set up but more stable
+and cheaper long term.
+
+The remaining sections document various outposts on the journey to
+displaying a web page on the internet. The first two are fine for this
+project.
+
+1. Manual S3/CloudFront/ACM provisioning
+2. Automate static site deployment with CloudFormation
+3. Adding security headers with Lambda@Edge
+4. Making a private site authenticated with Cognito
+
+** Manual infrastructure deployment
+To bootstrap S3 and CloudFront manually, the overview in [[https://repost.aws/knowledge-center/cloudfront-serve-static-website][How do I use CloudFront
+to serve a static website hosted on Amazon S3?]]: /Use a REST API endpoint as
+the origin, and restrict access with an OAC/ works fine, but some details always
+get me and make it take longer than it should. Here I follow the same process
+and point out the gotchas. To avoid this altogether, consider skipping ahead to
+use the CloudFormation template.
+
+Create the web site bucket. Specifying region us-east-1 saves time and
+headaches for CloudFront to resolve the REST endpoint of the new bucket.
+Otherwise it counterintuitively returns 307 redirects for an hour or so.
+
+#+BEGIN_SRC sh
+aws s3 mb --region us-east-1 s3://<your new bucket name>
+#+END_SRC
+
+Go to ACM and request a certificate for your domain name. Be sure to complete
+the domain verification part before moving on--do this /before/ clicking to
+create a new CloudFront distribution. Otherwise your certificate will not be
+available in the dropdown.
+
+Go to CloudFront and create a distribution.
+- Select the bucket as origin
+- Restrict bucket access. Create a new identify and update bucket permissions.
+- Fill in your site details and select the certificate you created (and
+  verified) in ACM
+
+** Infrastructure deployment via CloudFormation
+This site includes a template =infra/static-site.yaml= to create an S3 bucket,
+CloudFront distribution, and certificate with reasonable defaults with some
+automation. The template is derived from sources in [[https://github.com/aws-samples/amazon-cloudfront-secure-static-site][Amazon CloudFront Secure
+Static Website]].
+
+Simply deploy a new stack using the template and parameter overrides. If
+you do not have your domain set up as a Route53 hosted zone, set
+CreateDns=no. You'll need to create DNS records manually for: 1. Domain
+verification for the ACM cert (during deployment) 2. Pointing the
+subdomain to CloudFront (after deployment)
+
+#+BEGIN_SRC sh
+STACK=<your CloudFormation stack name>
+DOMAIN=<your domain name>
+SUBDOMAIN=<your subdomain e.g. www>
+
+aws --region us-east-1 cloudformation deploy \
+  --stack-name $STACK \
+  --template-file infra/static-site.yaml \
+  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+  --parameter-overrides DomainName=$DOMAIN SubDomain=$SUBDOMAIN CreateApex=yes CreateDns=no
+#+END_SRC
+
+Deployment will block on certificate DNS validation. Go to the ACM
+console to get the validation record details. Create the required record
+at your DNS provider.
+
+Once deployment completes, point the domain to CloudFront. Create the
+following record at your DNS provider to point the site to AWS:
+
+#+BEGIN_SRC sh
+aws --region us-east-1 cloudformation describe-stacks \
+  --stack-name $STACK \
+  --query "Stacks[0].Outputs[?OutputKey=='DNSRecord'].OutputValue" --output text
+#+END_SRC
+
+** Deploy site files
+Any variant of `aws s3 cp` or `sync` will do.
+
+#+BEGIN_SRC sh
+echo "export S3_BUCKET=`aws --region us-east-1 cloudformation describe-stacks \
+  --stack-name $STACK \
+  --query \"Stacks[0].Outputs[?OutputKey=='S3BucketRoot'].OutputValue\" --output text`" >> .env_deploy
+echo "export CF_DIST=`aws --region us-east-1 cloudformation describe-stacks \
+  --stack-name $STACK \
+  --query \"Stacks[0].Outputs[?OutputKey=='CloudFrontDistribution'].OutputValue\" --output text`" >> .env_deploy
+
+aws s3 sync build s3://$S3_BUCKET \
+    --delete \
+    --cache-control max-age=86400
+#+END_SRC
+
+And browse!
+
+#+BEGIN_EXAMPLE
+URL=https://`aws --region us-east-1 cloudformation describe-stacks \
+  --stack-name $STACK \
+  --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDomainName'].OutputValue" --output text`
+open $URL
+#+END_EXAMPLE
+
+If you want to force CloudFront invalidation of changed files, see [[https://github.com/shoover/shawnhoover.dev/blob/main/script/deploy-aws.sh][script/deploy-aws.sh]].
+** Configure GitHub Actions
+Deploying from GitHub Actions requires additional setup to allow GitHub access
+to your AWS account. One option is to create an IAM user and add access keys as
+secrets in GitHub. Here, we deploy a stack to allow integrating with the GitHub
+OIDC provider, so new keys are needed. Ref.: [[https://github.com/aws-actions/configure-aws-credentials#sample-iam-oidc-cloudformation-template][aws-actions]].
+
+1. Deploy the stack below.
+2. Go to IAM and create a policy with write access to the bucket and
+   CloudFront invalidation, e.g. =infra/www-ci-policy.json=.
+3. Create a role linked to the GitHub OIDC provider. Attach the policy.
+
+This template is setup for one GitHub user and repo. To tweak the subject
+condition see [[https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims][example subjects]].
+
+#+BEGIN_SRC sh
+GH_USER=shoover
+GH_REPO=$(basename `pwd`)
+ aws --region us-east-1 cloudformation deploy \
+  --stack-name github-aws-credentials \
+  --template-file infra/configure-aws-credentials.yaml \
+  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+  --parameter-overrides GitHubOrg=$GH_USER RepositoryName=$GH_REPO
+#+END_SRC
+
+** Secure static site
+CloudFront cannot add response headers on its own (as of April 2021). To serve a
+static site with security headers, you have to add a lambda function to add
+headers on every origin response. See [[https://github.com/aws-samples/amazon-cloudfront-secure-static-site][Amazon CloudFront Secure Static Website]].
+My [[https://github.com/shoover/amazon-cloudfront-secure-static-site/tree/no-r53][no-r53-branch]] removes the Route53 requirement, tweaks
+content-security-policy, and allows lambda updates.
+
+** Private static site
+[[https://github.com/aws-samples/cloudfront-authorization-at-edge][Authorization@Edge using cookies]] is a solution for private static site hosting
+on CloudFront/S3 with authentication via Cognito. It can be yours for the low,
+low upcharge of a dozen lambda functions and 2000 lines of CloudFormation.
+Thankfully the CloudFormation stack is available on the Marketplace and works
+fine, including optimizations for both static HTML and SPA modes.
+
+To deploy a static site:
+
+1. Deploy from the Marketplace with parameter tweaks:
+
+   - Application name: customize it
+   - Set =EnableSpa= to =false=
+   - HttpHeaders Content-Security-Policy: add =font-src 'self';= if you
+     will host font files
+   - AlternateDomainNames: set to your domain, matching what you put in
+     the CloudFront distribution
+
+2. In the console, request a certificate via ACM and add your domain
+   name to the CloudFront distribution.
+3. Upload your content to S3.
