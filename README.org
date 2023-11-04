@@ -16,7 +16,7 @@ Requirements for the basic dev/writing setup:
 
 #+BEGIN_SRC sh
 make build serve
-open http://127.0.0.1:5000
+open http://localhost:5000
 #+END_SRC
 
 * Orgmode-generated blog

@@ -15,7 +15,7 @@
 ;;
 ;; Usage:
 ;;   M-x notes-server-start
-;;   open http://127.0.0.1:5000/notes
+;;   open http://localhost:5000/notes
 ;;   C-x C-f notes/xyz.org
 ;;   C-x C-s
 ;;
@@ -23,11 +23,9 @@
 ;; - (package-install 'websocket)
 ;;
 ;; TODO:
-;; - Normalize and namespace all functions and variables
-;; - Debug/log the background process
-;; - Build images and styles
+;; - TODO: Watch/rebuild *.css and publish.el changes.
 
-(require 'cl) ; lexical-let
+(require 'cl) ; For lexical-let
 (require 'websocket)
 (require 'simple-httpd)
 
@@ -96,8 +94,7 @@ prevent concurrent builds if files are saved in quick succession.")
   (set-process-sentinel notes-publish-process (make-rebuild-site-sentinel buffer-file)))
 
 (defun notes-project-buffer-save-hook ()
-  "Watches for project file changes and triggers a rebuild.
-TODO: Watch *.css and publish.el."
+  "Watches for project file changes and triggers a rebuild."
   (let ((buffer-file (buffer-file-name)))
     (when (and buffer-file
                (string-prefix-p (expand-file-name "content/notes" notes-root-dir)
@@ -115,10 +112,12 @@ TODO: Watch *.css and publish.el."
 Installs a save hook to watch for project file changes and trigger a
 rebuild."
   (interactive)
-  (let ((httpd-port 5000))
+  (let ((httpd-host "0.0.0.0") ; Allow testing on the LAN
+        (httpd-port 5000)
+        (websocket-port 5001))
     (httpd-serve-directory (expand-file-name "build" notes-root-dir)))
 
-  (setq notes-websocket-server (websocket-server 5001
+  (setq notes-websocket-server (websocket-server websocket-port
                                                   :on-open 'notes-websocket-open
                                                   :on-close 'notes-websocket-close
                                                   :on-error 'notes-websocket-error))
@@ -138,10 +137,5 @@ rebuild."
 
   (httpd-stop))
 
-;;(global-set-key (kbd "C-c s") 'start-static-file-server)
-;;(global-set-key (kbd "C-c q") 'stop-static-file-server)
-
-(when nil
-  (let ((buffer-file "xyz.org"))
-    (json-encode `((:type . "build_complete") (:source . ,buffer-file))))
-  )
+;;(global-set-key (kbd "C-c s") 'notes-server-start)
+;;(global-set-key (kbd "C-c q") 'notes-server-stop)

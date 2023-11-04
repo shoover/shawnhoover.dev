@@ -1,4 +1,21 @@
+;; A static site generator script for the Notes blog.
+;;
+;; This is built on the orgmode project system with static and dynamic
+;; customization. `notes-publish' configures and builds a project with the
+;; following:
+;; - Publish .org files in notes/ to HTML with navigation/footer templates
+;; - HTML sitemap listing for .org files in descending chronological order
+;; - RSS feed generated from the sitemap
+;; - Hot reloading script included in the pages when invoked in writing mode
+;;   (--writing=t is set)
+;;
 ;; Usage: emacs --script publish.el [--force=t] [--writing=t]
+;;
+;; Requirements:
+;; - A recent-ish org-mode installed by the package system, e.g. 9.6.9
+;; - ox-rss.el in the same directory. This seems to have been removed from
+;;   org-contrib. Also it had key limitations that I've patched.
+;; - patch-ox-html.el,  until a bug fix is released in org-mode 9.7
 
 ;; Process script args.
 (setq force-publish-all (member "--force=t" argv))
@@ -106,8 +123,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
   (let* ((dir-exp (expand-file-name dir))
          (org-publish-project-alist
           `(("Notes"
-             :components ("orgfiles" ;; "css"
-                          "script" "rss"))
+             :components ("orgfiles" "script" "rss"))
 
             ("orgfiles"
              :base-directory ,dir-exp
@@ -118,6 +134,8 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
 
              :html-link-home "/notes/"
              :html-link-use-abs-url t
+
+             ;; Disable inserting built-in home/up nav links. We control this in the preamble.
              :html-home/up-format ""
 
              :html-preamble notes-html-preamble
@@ -130,6 +148,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
 </section>"
              :html-postamble notes-html-postamble
 
+             ;; Load the hot reload script only when generating the site in local writing mode.
              ,@(when notes-writing-mode
                  '(:html-head-extra "<script src=\"/notes/reload.js\"></script>"))
 
@@ -137,14 +156,11 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
              :sitemap-filename "index.org"
              :sitemap-title "Notes"
              :sitemap-sort-files anti-chronologically
+
+             ;; Customize sitemap generation to include all the properties needed to
+             ;; generate a feed from the sitemap in the "rss" subproject.
              :sitemap-format-entry sitemap-rss-entry
              :sitemap-function sitemap-rss-generate-tree)
-
-            ;; ("css"
-            ;;  :base-directory ,dir-exp
-            ;;  :base-extension "css"
-            ;;  :publishing-directory ,target
-            ;;  :publishing-function org-publish-attachment)
 
             ;; Explicitly include hot reloading in writing mode. No other scripts are needed.
             ("script"
