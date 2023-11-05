@@ -1,9 +1,9 @@
 ;; A static site generator script for the Notes blog.
 ;;
-;; This is built on the orgmode project system with static and dynamic
-;; customization. `notes-publish' configures and builds a project with the
+;; This is built on the orgmode project system with a mix of static and dynamic
+;; customization. `notes-publish' configures and builds a project supporting the
 ;; following:
-;; - Publish .org files in notes/ to HTML with navigation/footer templates
+;; - HTML generated for .org files in notes/, with navigation/footer templates
 ;; - HTML sitemap listing for .org files in descending chronological order
 ;; - RSS feed generated from the sitemap
 ;; - Hot reloading script included in the pages when invoked in writing mode
@@ -12,16 +12,16 @@
 ;; Usage: emacs --script publish.el [--force=t] [--writing=t]
 ;;
 ;; Requirements:
-;; - A recent-ish org-mode installed by the package system, e.g. 9.6.9
+;; - A recent org-mode package, e.g. 9.6.9 (9.6.6 installed in Emacs 29 doesn't work, IIRC)
 ;; - ox-rss.el in the same directory. This seems to have been removed from
 ;;   org-contrib. Also it had key limitations that I've patched.
-;; - patch-ox-html.el,  until a bug fix is released in org-mode 9.7
+;; - patch-ox-html.el, until a bug fix is released in org-mode 9.7
 
 ;; Process script args.
 (setq force-publish-all (member "--force=t" argv))
 (setq notes-writing-mode (member "--writing=t" argv))
 
-;; Load orgmode from the package since that is probably more recent than the built-in.
+;; Load orgmode, targeting the package over the built-in.
 (require 'package)
 (package-initialize)
 (require 'org)
@@ -37,7 +37,7 @@
 
 
 ;;
-;; Sitemap generation. The sitemap is published to both an index page and RSS feed.
+;; Sitemap generation. Generate entries to publish to both an index page and RSS feed.
 ;;
 
 (defun sitemap-rss-entry (entry style project)
@@ -109,14 +109,16 @@ preformatted subtrees from `sitemap-rss-entry'."
 
 
 ;;
-;; Publishing. The publish project is wrapped in a function to allow conditional
-;; inclusion of hot reloading. The project name and source/target directories
-;; are parameterized but could probably be hardcoded.
+;; Publishing. Wraps a call to `org-publish' using a generated
+;; `org-publish-project-alist' to conditionally include hot reloading.
 ;;
 
 (defun notes-publish (dir target)
   "Publishes my Notes blog from sources in DIR to HTML/RSS in TARGET.
-Includes HTML hot reloading if `notes-writing-mode' is non-nil."
+Includes HTML hot reloading if `notes-writing-mode' is non-nil.
+
+Source/target directories are parameterized but could probably be
+hardcoded."
   (unless (file-exists-p dir)
     (error "Org dir %s does not exist" dir))
 
@@ -125,6 +127,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
           `(("Notes"
              :components ("orgfiles" "script" "rss"))
 
+            ;; Generate posts+sitemap HTML
             ("orgfiles"
              :base-directory ,dir-exp
              :publishing-directory ,target
@@ -148,7 +151,8 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
 </section>"
              :html-postamble notes-html-postamble
 
-             ;; Load the hot reload script only when generating the site in local writing mode.
+             ;; Include the hot reload script only when generating the site in
+             ;; local writing mode.
              ,@(when notes-writing-mode
                  '(:html-head-extra "<script src=\"/notes/reload.js\"></script>"))
 
@@ -162,7 +166,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
              :sitemap-format-entry sitemap-rss-entry
              :sitemap-function sitemap-rss-generate-tree)
 
-            ;; Explicitly include hot reloading in writing mode. No other scripts are needed.
+            ;; Build (copy) JS. Only needed for reloading in writing mode.
             ("script"
              :base-directory ,dir-exp
              :base-extension "js"
@@ -172,6 +176,7 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
              :publishing-directory ,target
              :publishing-function org-publish-attachment)
 
+            ;; Build the feed from the sitemap generated in "orgfiles".
             ("rss"
              :base-directory ,dir-exp
              :base-extension "org"
@@ -204,6 +209,10 @@ Includes HTML hot reloading if `notes-writing-mode' is non-nil."
     (message "Publishing org-mode project: %s" dir-exp)
     (org-publish-project "Notes" force)))
 
+
+;;
+;; Main
+;;
 
 (notes-publish "content/notes" "build/notes")
 

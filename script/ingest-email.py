@@ -4,13 +4,18 @@
 # separate branch and PR. Multiple emails/branches are processed, but only the
 # last one will be deployed automatically.
 #
+# Outputs (side effects):
+# - Previously unread messages are marked as read in the IMAP folder
+# - One git branch pushed and one PR created per message processed
+# - The last new branch is left checked out in the local repo
+#
 # Requirements:
 # - pip install -r requirements.txt
 # - pandoc on the PATH
 # - Environment variables: IMAP_USERNAME, IMAP_PASSWORD, IMAP_FOLDER,
 #   ALLOWED_SENDERS (comma-separated)
 #
-# To test offline:
+# To test locally:
 # 1. Go to Cloudflare, Email Routing, Email Workers, and disable the route.
 # 2. Send a test email.
 # 3. source .env_secrets; unset GITHUB_TOKEN
@@ -18,6 +23,7 @@
 
 
 from bs4 import BeautifulSoup
+import dkim
 import email
 import imaplib
 import os
@@ -56,6 +62,14 @@ def summarize_part(part, message):
     print(f"  Content-Type: {content_type}")
     print(f"  Content-Disposition: {content_disposition}")
     print(f"  Filename: {filename}")
+
+#
+# Email validation
+#
+
+def arc_authenticated(msg_bytes):
+    result, dicts, reason = dkim.arc_verify(msg_bytes)
+    return result == dkim.CV_Pass
 
 #
 # Email to post conversion
@@ -216,11 +230,18 @@ for email_id in email_id_list:
     if status != "OK":
         raise Exception(f"Fetch {email_id} failed: {status}.")
 
-    post = extract_post(email.message_from_bytes(email_data[0][1]),
-                        org_dest=notes_dest, img_dest=img_dest)
+    msg_bytes = email_data[0][1]
+
+    # Scream if a message shows up failing ARC authentication.
+    if not arc_authenticated(msg_bytes):
+        raise Exception(f": {sender} ({subject})")
+
+    post = extract_post(email.message_from_bytes(msg_bytes), org_dest=notes_dest, img_dest=img_dest)
 
     check_in(post['subject'], notes_dest, img_dest)
 
     imap.store(email_id, "+FLAGS", "\Seen")
 
 imap.logout()
+
+# Leave the last post branch checked out, i.e. readable with `git rev-parse --abbrev-ref HEAD`

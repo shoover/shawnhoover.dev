@@ -5,9 +5,9 @@
 # from a branch pushed from another job.
 name: Email Ingestion
 on:
-  workflow_dispatch:
-  repository_dispatch:
+  repository_dispatch:          # Primary trigger: on-demand via GitHub API call
     types: [email_received]
+  workflow_dispatch:            # Second trigger to allow testing from the web app
 
 env:
   # Override the time zone to the one that post timestamps are authored in
@@ -20,11 +20,11 @@ jobs:
     name: It's the email, the email, what-what, the email
     runs-on: ubuntu-latest
     permissions:
-      contents: write           # Allowing pushing branches
+      contents: write           # Allowing pushing branches with new posts
       pull-requests: write      # Allow creating PRs to review and merge new posts
 
     outputs:
-      # Output the branch of the ingested post to use in the deploy job.
+      # Output the branch of the ingested post to deploy
       ingested_ref: ${{ steps.ingest.outputs.ingested_ref }}
       
     steps:
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10' # I had some trouble installing pendulum in 3.12.
+          python-version: '3.10' # I got stuck installing pendulum in 3.12
           cache: 'pip'
       - name: Setup
         run: |
@@ -46,20 +46,20 @@ jobs:
           alias pandoc="$HOME/.local/bin/pandoc"
 
           pip install -r requirements.txt
-      - id: ingest
-        name: Ingest
+      - name: Ingest
+        id: ingest
         env:
           IMAP_USERNAME: ${{ secrets.IMAP_USERNAME }}
           IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
           IMAP_FOLDER: ${{ secrets.IMAP_FOLDER }}
           ALLOWED_SENDERS: ${{ secrets.ALLOWED_SENDERS }}
-
-          # Needed for `gh pr create`
-          GH_TOKEN: ${{ github.token }} 
+          GH_TOKEN: ${{ github.token }} # Needed for `gh pr create`
         run: |
           python script/ingest-email.py
-          ingested_ref=$(git rev-parse --abbrev-ref HEAD)
-          echo "ingested_ref=$ingested_ref" >> $GITHUB_OUTPUT
+
+          # Output the post branch (or the last branch, if multiple posts are
+          # ingested in one job), implicitly left checked out by the script
+          echo "ingested_ref=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
 
   deploy:
     name: Here comes an email!
