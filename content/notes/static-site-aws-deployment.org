@@ -3,11 +3,10 @@
 #+date: <2023-11-04 Sat 10:49>
 #+setupfile: org.txt
 
-/Editor's note: This note is the original readme for this site's GitHub repo
-when I created the site in 2021 and explored a minimal, mostly automated,
-self-managed, serverless setup with HTTPS. Now that the site has grown a
-generator, I'm pulling the raw static infra information out to a dedicated
-page./
+/Editor's note: This note is the original readme for this site's GitHub repo,
+created in 2021 when I explored a minimal, mostly automated, self-managed,
+serverless setup with HTTPS. Now that the site has grown a generator, I'm
+pulling the raw static infra information out to a separate page./
 
 * Just a website
 The site itself is 50 lines of HTML, plus styles and supporting media
@@ -18,8 +17,8 @@ And then there's the 200 lines of YAML, because what's a cloud-era project
 without a 1:4 ratio of content development to infrastructure work? This is
 roughly the minimum to spin up a static site on S3 and CloudFront with https. It
 looks like a lot for "just a website," but compared to running a server, I'd say
-it's similar effort to set up; and cheaper and more secure to run long term.
-Compared to using any SaaS provider, it's more work to set up but more stable
+it's similar effort for initial setup and cheaper and more secure to run long
+term. Compared to using a SaaS host, it's more work to set up but more stable
 and cheaper long term.
 
 The remaining sections document various outposts on the journey to
@@ -32,14 +31,14 @@ project.
 4. Making a private site authenticated with Cognito
 
 ** Manual infrastructure deployment
-To bootstrap S3 and CloudFront manually, the overview in [[https://repost.aws/knowledge-center/cloudfront-serve-static-website][How do I use CloudFront
-to serve a static website hosted on Amazon S3?]]: /Use a REST API endpoint as
-the origin, and restrict access with an OAC/ works fine, but some details always
-get me and make it take longer than it should. Here I follow the same process
-and point out the gotchas. To avoid this altogether, consider skipping ahead to
-use the CloudFormation template.
+To bootstrap S3 and CloudFront manually, following [[https://repost.aws/knowledge-center/cloudfront-serve-static-website][How do I use CloudFront to
+serve a static website hosted on Amazon S3?]]: /Use a REST API endpoint as the
+origin, and restrict access with an OAC/ works fine, but some details always
+trip me up make the process take longer than it should. Here I follow the same
+process and point out the gotchas. To reduce manual steps, consider skipping
+ahead to use the CloudFormation template.
 
-Create the web site bucket. Specifying region us-east-1 saves time and
+First, create the web site bucket. Using region us-east-1 saves time and
 headaches for CloudFront to resolve the REST endpoint of the new bucket.
 Otherwise it counterintuitively returns 307 redirects for an hour or so.
 
@@ -47,12 +46,12 @@ Otherwise it counterintuitively returns 307 redirects for an hour or so.
 aws s3 mb --region us-east-1 s3://<your new bucket name>
 #+END_SRC
 
-Go to ACM and request a certificate for your domain name. Be sure to complete
-the domain verification part before moving on--do this /before/ clicking to
-create a new CloudFront distribution. Otherwise your certificate will not be
-available in the dropdown.
+Second, go to ACM and request a certificate for your domain name. Be sure to
+complete the domain verification part before moving on--do this /before/
+clicking to create a new CloudFront distribution. Otherwise your certificate
+will not be available in the dropdown.
 
-Go to CloudFront and create a distribution.
+Lastly, go to CloudFront and create a distribution.
 - Select the bucket as origin
 - Restrict bucket access. Create a new identify and update bucket permissions.
 - Fill in your site details and select the certificate you created (and
