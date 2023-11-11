@@ -4,6 +4,5 @@
 build
 content/assets/ext
 content/notes/index.org
-script/ext
 
 .bundle
