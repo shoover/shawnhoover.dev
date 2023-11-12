@@ -8,7 +8,7 @@ for this site. This post shows how that works.
 
 ** Overview
 The basic requirement is to fetch email from a dedicated mailbox, save each new
-message to a post file, and push it to git. I'm already using GitHub Actions for
+message to a post file, and push to git. I'm already using GitHub Actions for
 deployment, so I chose that as the runtime environment.
 
 To process new posts as quickly as possible (rather than on a cron schedule), I
@@ -22,7 +22,7 @@ to the main site.
 Here's the end-to-end flow:
 
 #+CAPTION: End-to-end email ingestion diagram
-[[../assets/images/notes/email-to-git-workflow/end-to-end.svg]]
+[[../assets/images/notes/email-to-git-workflow/end-to-end.png]]
 
 ** GitHub Actions Code
 The GitHub workflow code is in [[https://github.com/shoover/shawnhoover.dev/blob/main/script/ingest-email.py][ingest-email.py]]. I'll walk through some of it
