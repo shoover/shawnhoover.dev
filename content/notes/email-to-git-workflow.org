@@ -6,7 +6,7 @@
 In [[file:email-still-works.org][Email Still Works]] I mentioned I wrote some code to set up posting by email
 for this site. This post shows how that works.
 
-** Overview
+* Overview
 The basic requirement is to fetch email from a dedicated mailbox, save each new
 message to a post file, and push to git. I'm already using GitHub Actions for
 deployment, so I chose that as the runtime environment.
@@ -24,7 +24,7 @@ Here's the end-to-end flow:
 #+CAPTION: End-to-end email ingestion diagram
 [[../assets/images/notes/email-to-git-workflow/end-to-end.png]]
 
-** GitHub Actions Code
+* GitHub Actions Code
 The GitHub workflow code is in [[https://github.com/shoover/shawnhoover.dev/blob/main/script/ingest-email.py][ingest-email.py]]. I'll walk through some of it
 here.
 
@@ -109,7 +109,7 @@ with open(note_file_path, "w") as f:
 Shell commands push the files to git and create a PR. Lastly, the existing
 deploy workflow is triggered to build the branch[fn:1].
 
-** Email Worker Code
+* Email Worker Code
 The GitHub job is triggered by a Cloudflare Email Worker. This part adds
 operational overhead and could be replaced with a cron trigger, but it's worth
 it for now to get immediate feedback.
