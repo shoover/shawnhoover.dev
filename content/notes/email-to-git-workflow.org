@@ -3,32 +3,44 @@
 #+date: <2023-11-12 Sun 10:44>
 #+setupfile: org.txt
 
-In [[file:email-still-works.org][Email Still Works]] I mentioned I wrote some code to set up posting by email
-for this site. This post shows how that works.
+In [[file:email-still-works.org][Email Still Works]] I mentioned I wrote code to set up posting by email for
+this site. This post shows how that works[fn:2].
 
 * Overview
 The basic requirement is to fetch email from a dedicated mailbox, save each new
 message to a post file, and push to git. I'm already using GitHub Actions for
-deployment, so I chose that as the runtime environment.
+deployment, so I chose that as a handy serverless runtime environment.
 
 To process new posts as quickly as possible (rather than on a cron schedule), I
-also deployed a Cloudflare Email Worker to ping GitHub and trigger email
-ingestion as soon as an email lands. In a few seconds after hitting send from
-the mail app on my phone, the email is processed to orgmode and pushed to a PR.
-From there I can preview the post in GitHub web's rendering of the .org file or
-jump over to the freshly deployed staging site. Merging the PR deploys the post
-to the main site.
+also deployed a Cloudflare Email Worker that pings GitHub and triggers email
+ingestion via [[https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch][repository_dispatch]] as soon as an email lands. I'm already using
+Cloudflare for domain registration and have a couple email routes there. Email
+Workers, currently in beta, are perfectly suited to a glue handler like this
+(for a hobby project--I can't speak to production readiness). My main hangup
+with this otherwise set-and-forget component is the need to rotate the
+auto-expiring GitHub token used to authenticate the repository dispatch. I need
+to find out how to automate that, because manually updating secrets every three
+months is not something I want to do for a hobby project.
 
-Here's the end-to-end flow:
+For the trouble, though, I can post from my phone--including formatted text and
+images--with an easy, quick feedback loop. Within a few seconds of hitting send
+in the email app, the message is processed to orgmode and pushed to a PR. From
+the PR, I can preview the post in the GitHub code browser (.org renders just
+like markdown) or jump over to the staging site, which will be freshly deployed
+a few seconds after the PR is created. If there are any issues, I can edit in
+place using GitHub web (it's unpleasant but possible on a phone). Merging the PR
+deploys the post to the main site.
+
+Here's the high level workflow:
 
 #+CAPTION: End-to-end email ingestion diagram
 [[../assets/images/notes/email-to-git-workflow/end-to-end.png]]
 
 * GitHub Actions Code
-The GitHub workflow code is in [[https://github.com/shoover/shawnhoover.dev/blob/main/script/ingest-email.py][ingest-email.py]]. I'll walk through some of it
-here.
+The complete GitHub workflow code is in [[https://github.com/shoover/shawnhoover.dev/blob/main/script/ingest-email.py][ingest-email.py]]. I'll cover the high
+points here.
 
-Email fetching requires straightforward IMAP processing.
+Emails are fetched with straightforward IMAP processing.
 
 #+begin_src python
 import dkim
@@ -63,9 +75,9 @@ imap.logout()
 #+end_src
 
 
-The happy path extracts the body from a multipart email (in theory plain text
-email is handled--I didn't test it), does a little HTML cleanup, and converts to
-orgmode using the venerable, amazing pandoc.
+The happy path extracts the message body from a multipart email (in theory plain
+text email is handled--I didn't test it), does a little HTML cleanup, and
+converts to orgmode using the venerable, amazing pandoc.
 
 #+begin_src python
 for part in msg.walk():
@@ -106,15 +118,11 @@ with open(note_file_path, "w") as f:
 {content}""")
 #+end_src
 
-Shell commands push the files to git and create a PR. Lastly, the existing
+Standard git commands commit files to git and create a PR. Lastly, an existing
 deploy workflow is triggered to build the branch[fn:1].
 
 * Email Worker Code
-The GitHub job is triggered by a Cloudflare Email Worker. This part adds
-operational overhead and could be replaced with a cron trigger, but it's worth
-it for now to get immediate feedback.
-
-The code does some sender validation and ultimately makes one GitHub API call:
+The Email Worker validates the sender and ultimately makes one GitHub API call:
 
 #+begin_src js
 const url = `https://api.github.com/repos/${owner_repo}/dispatches`;
@@ -135,11 +143,13 @@ const response = await fetch(url, {
 #+end_src
 
 * Conclusion
-After a bit of setup, this workflow is easy to use and so far it's working
-great. With the flexibility of HTML converters and different attachment types,
-the same concept could be extended to any static content format.
+After a bit of setup, processing email to text in GitHub Actions is easy to use
+and, so far, works great. With the flexibility of HTML converters and different
+attachment types, the same concept could be extended to any static content
+format.
 
 * Footnotes
+[fn:2] But, alas, was not itself authored by email.
 
 [fn:1] This requirement to explicitly trigger the deploy job confused me. I
 assumed the existing =push= trigger would happen automatically, and it didn't.
