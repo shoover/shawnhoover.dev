@@ -115,12 +115,12 @@ rebuild."
   (let ((httpd-host "0.0.0.0") ; Allow testing on the LAN
         (httpd-port 5000)
         (websocket-port 5001))
-    (httpd-serve-directory (expand-file-name "build" notes-root-dir)))
+    (httpd-serve-directory (expand-file-name "build" notes-root-dir))
 
-  (setq notes-websocket-server (websocket-server websocket-port
-                                                  :on-open 'notes-websocket-open
-                                                  :on-close 'notes-websocket-close
-                                                  :on-error 'notes-websocket-error))
+    (setq notes-websocket-server (websocket-server websocket-port
+                                                   :on-open 'notes-websocket-open
+                                                   :on-close 'notes-websocket-close
+                                                   :on-error 'notes-websocket-error)))
 
   (setq notes-publish-pending nil)
 

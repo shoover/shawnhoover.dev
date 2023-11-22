@@ -16,11 +16,10 @@ also deployed a Cloudflare Email Worker that pings GitHub and triggers email
 ingestion via [[https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch][repository_dispatch]] as soon as an email lands. I'm already using
 Cloudflare for domain registration and have a couple email routes there. Email
 Workers, currently in beta, are perfectly suited to a glue handler like this
-(for a hobby project--I can't speak to production readiness). My main hangup
-with this otherwise set-and-forget component is the need to rotate the
-auto-expiring GitHub token used to authenticate the repository dispatch. I need
-to find out how to automate that, because manually updating secrets every three
-months is not something I want to do for a hobby project.
+(for a hobby project--I can't speak to production readiness). To make GitHub API
+calls, I had to create a GitHub App and [[https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation#using-the-octokitjs-sdk-to-authenticate-as-an-app-installation][authenticate as an app installation]] with
+a private key. The one-time[fn:3] App/App installation/private key setup is
+reasonably well documented and straightforward, with one caveat.[fn:4]
 
 For the trouble, though, I can post from my phone--including formatted text and
 images--with an easy, quick feedback loop. Within a few seconds of hitting send
@@ -125,20 +124,28 @@ deploy workflow is triggered to build the branch[fn:1].
 The Email Worker validates the sender and ultimately makes one GitHub API call:
 
 #+begin_src js
-const url = `https://api.github.com/repos/${owner_repo}/dispatches`;
-const response = await fetch(url, {
-    method: 'POST',
+const app = new App({
+	appId,
+	privateKey,
+});
+
+const {
+	data: { id },
+} = await app.octokit.request('GET /repos/{owner}/{repo}/installation', {
+	owner,
+	repo,
 	headers: {
-		"Authorization": `Bearer ${token}`,
-		"X-GitHub-Api-Version": "2022-11-28",
-		"Content-Type": "application/json;charset=UTF-8",
-		"Accept": "application/vnd.github+json",
-		"User-Agent": `${owner_repo} email-worker`,
-	},
-	body: JSON.stringify({
-		"event_type": "email_received",
-		"client_payload": {}
-	}),
+		'X-GitHub-Api-Version': '2022-11-28'
+	}
+})
+
+const octokit = await app.getInstallationOctokit(id);
+
+await octokit.rest.repos.createDispatchEvent({
+	owner: OWNER,
+	repo: REPO,
+	event_type: "email_received",
+	client_payload: {},
 });
 #+end_src
 
@@ -149,6 +156,15 @@ attachment types, the same concept could be extended to any static content
 format.
 
 * Footnotes
+[fn:4] The caveat: GitHub exports private keys in PKCS#1 format, which works
+fine with nodejs. However, WebCrypto, as used in Cloudflare's worker runtime,
+requires PKCS#8. I had to convert the key to PKCS#8 using openssl (see [[https://github.com/gr2m/universal-github-app-jwt#readme][here]])
+before creating the secret in Cloudflare.
+
+[fn:3] An earlier version of this note lamented the need to rotate a personal
+access token every three months. I've since learned about GitHub Apps, [[https://github.com/shoover/shawnhoover.dev/commit/a3735990302fefb61f2a82d2afb34cbe6e123305#diff-e451850c449a4b52253b4ddd4e26e4b990cc11d086b2381e1fa7ea7d0405a296R48][fixed]] the
+hangup, and updated the note.
+ 
 [fn:2] But, alas, was not itself authored by email.
 
 [fn:1] This requirement to explicitly trigger the deploy job confused me. I
