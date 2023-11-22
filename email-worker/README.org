@@ -1,12 +1,3 @@
-
-TODO:
-- Check ARC-Authentication-Results dkim=pass spf=pass dmarc=pass in the ingest
-  workflow
-- Find a way to trigger deploy after pushing from ingest
-  - GitHub will not automatically trigger a branch build if you pushed from a
-    workflow. Workaround: push using a separate token.
-  - Would calling the workflow work?
-
 Create and deploy a Cloudflare Email Worker.
 
 #+begin_src sh
@@ -21,8 +12,14 @@ npm install wrangler --save-dev
 npx wrangler secret put ALLOWED_SENDERS
 npx wrangler secret put ALLOWED_FORWARDED_FOR
 npx wrangler secret put ALLOWED_FORWARDER_PATTERN
-npx wrangler secret put GITHUB_TOKEN
-npx wrangler secret put OWNER_REPO
+npx wrangler secret put OWNER
+npx wrangler secret put REPO
+npx wrangler secret put GITHUB_APP_ID
+
+# Convert GitHub "RSA PRIVATE KEY" PKCS#1 format to PKCS#8 format required by
+# the WebCrypto API. See https://github.com/gr2m/universal-github-app-jwt#readme.
+openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in github.rsa-private-key.pem -out private-key-pkcs8.key
+cat private-key-pkcs8.key | npx wrangler secret put GITHUB_PRIVATE_KEY
 
 npx wrangler deploy
 
@@ -43,4 +40,11 @@ echo curl --request POST \
   "event_type": "email_received",
   "client_payload": {}
 }'
+#+end_src
+
+Test posting as a GitHub app:
+
+#+begin_src sh
+source .dev.vars
+GITHUB_APP_ID=$GITHUB_APP_ID GITHUB_PRIVATE_KEY=$(cat xxx.pem) npx node test/app_auth_test.mjs
 #+end_src

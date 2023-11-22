@@ -11,6 +11,9 @@
 name: Deployment
 on:
   push:
+    paths:
+      - 'content/**'
+      - 'publish/**'
   workflow_call:
     inputs:
       # Branch to build when reusing the workflow.

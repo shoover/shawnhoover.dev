@@ -1,3 +1,9 @@
+import { App } from "octokit";
+
+//
+// Support functions
+//
+
 async function streamToText(stream) {
   const reader = stream.getReader();
   const decoder = new TextDecoder('utf-8');
@@ -38,16 +44,48 @@ function assertEnv(env, name) {
 	return env[name];
 }
 
+async function authenticatedGitHubRestApi(owner, repo, appId, privateKey) {
+		const app = new App({
+			appId,
+			privateKey,
+		});
+
+		console.log("Getting installation ID");
+
+		const {
+			data: { id },
+		} = await app.octokit.request('GET /repos/{owner}/{repo}/installation', {
+			owner,
+			repo,
+			headers: {
+				'X-GitHub-Api-Version': '2022-11-28'
+			}
+		})
+
+		console.log(`Installation: ${id}`);
+
+		return await app.getInstallationOctokit(id);
+}
+
+//
+// Email handler
+//
+
 export default {
 	async email(message, env, ctx) {
+		console.log(`Received message from ${message.from}\n${headersToString(message.headers)}`);
+
 		const allowList = assertEnv(env, 'ALLOWED_SENDERS').split(",");
 		const allowForwardedFor = assertEnv(env, 'ALLOWED_FORWARDED_FOR');
 		const allowForwarderPattern = new RegExp(assertEnv(env, 'ALLOWED_FORWARDER_PATTERN'));
 
-		const owner_repo = assertEnv(env, 'OWNER_REPO');
-		const token = assertEnv(env, 'GITHUB_TOKEN');
+		const OWNER = assertEnv(env, 'OWNER');
+		const REPO = assertEnv(env, 'REPO');
+		const GITHUB_APP_ID = assertEnv(env, 'GITHUB_APP_ID');
+		const GITHUB_PRIVATE_KEY = assertEnv(env, 'GITHUB_PRIVATE_KEY');
 
-		console.log(`Received message from ${message.from}\n${headersToString(message.headers)}`);
+		// Initialize GitHub API access as an Email Worker Trigger app installation.
+		const octokit = await authenticatedGitHubRestApi(OWNER, REPO, GITHUB_APP_ID, GITHUB_PRIVATE_KEY);
 
 		// Log forwarding permission requests from Gmail.
 		if (message.from === "forwarding-noreply@google.com") {
@@ -70,27 +108,15 @@ export default {
 			console.log(`Forward allowed. Posting to GitHub.`);
 		}
 
-		const url = `https://api.github.com/repos/${owner_repo}/dispatches`;
+		console.log(`Posting dispatch event to GitHub ${OWNER}/${REPO}`);
 
-		console.log(`Posting to GitHub: ${url}`);
+		const response = await octokit.rest.repos.createDispatchEvent({
+			owner: OWNER,
+			repo: REPO,
+			event_type: "email_received",
+			client_payload: {},
+		});
 
-		const response = await fetch(url, {
-      method: 'POST',
-			headers: {
-				"Authorization": `Bearer ${token}`,
-				"X-GitHub-Api-Version": "2022-11-28",
-				"Content-Type": "application/json;charset=UTF-8",
-				"Accept": "application/vnd.github+json",
-				"User-Agent": `${owner_repo} email-worker`,
-			},
-			body: JSON.stringify({
-				"event_type": "email_received",
-				"client_payload": {}
-			}),
-    });
-
-		const response_body = await response.text();
-
-		console.log(`GitHub response: ${response.status} ${response_body}`);
+		console.log(`GitHub response: ${JSON.stringify(response, null, 2)}`);
 	}
 };
