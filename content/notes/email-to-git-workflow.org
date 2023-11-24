@@ -7,21 +7,20 @@ In [[file:email-still-works.org][Email Still Works]] I mentioned I wrote code to
 this site. This post shows how that works[fn:2].
 
 * Overview
-The basic requirement is to fetch email from a dedicated mailbox, save each new
-message to a post file, and push to git. I'm already using GitHub Actions for
+The basic requirement is to fetch email from a dedicated mailbox and save each new
+message to a post file git. I'm already using GitHub Actions for
 deployment, so I chose that as a handy serverless runtime environment.
 
-To process new posts as quickly as possible (rather than on a cron schedule), I
-also deployed a Cloudflare Email Worker that pings GitHub and triggers email
+Ideally, new posts would be processed as soon as possible. Rather than tuning a cron schedule (on the order of minutes?), I deployed a Cloudflare Email Worker that pings GitHub and triggers email
 ingestion via [[https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch][repository_dispatch]] as soon as an email lands. I'm already using
 Cloudflare for domain registration and have a couple email routes there. Email
 Workers, currently in beta, are perfectly suited to a glue handler like this
 (for a hobby project--I can't speak to production readiness). To make GitHub API
-calls, I had to create a GitHub App and [[https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation#using-the-octokitjs-sdk-to-authenticate-as-an-app-installation][authenticate as an app installation]] with
-a private key. The one-time[fn:3] App/App installation/private key setup is
-reasonably well documented and straightforward, with one caveat.[fn:4]
+calls, I created a GitHub App and [[https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation#using-the-octokitjs-sdk-to-authenticate-as-an-app-installation][authenticate as an app installation]] with
+a private key. The one-time App/App installation/private key setup process is
+reasonably well documented; setup and coding to migrate from using a personal access token to app installation[fn:3] took about an hour.[fn:4]
 
-For the trouble, though, I can post from my phone--including formatted text and
+The result is a nice event-driven workflow. I can post from my phone--including formatted text and
 images--with an easy, quick feedback loop. Within a few seconds of hitting send
 in the email app, the message is processed to orgmode and pushed to a PR. From
 the PR, I can preview the post in the GitHub code browser (.org renders just
@@ -117,8 +116,8 @@ with open(note_file_path, "w") as f:
 {content}""")
 #+end_src
 
-Standard git commands commit files to git and create a PR. Lastly, an existing
-deploy workflow is triggered to build the branch[fn:1].
+Everyday git commands commit new files to git and create a PR. Lastly, the
+deploy workflow is explicitly triggered to build the branch[fn:1].
 
 * Email Worker Code
 The Email Worker validates the sender and ultimately makes one GitHub API call:
@@ -156,14 +155,13 @@ attachment types, the same concept could be extended to any static content
 format.
 
 * Footnotes
-[fn:4] The caveat: GitHub exports private keys in PKCS#1 format, which works
-fine with nodejs. However, WebCrypto, as used in Cloudflare's worker runtime,
-requires PKCS#8. I had to convert the key to PKCS#8 using openssl (see [[https://github.com/gr2m/universal-github-app-jwt#readme][here]])
+[fn:4] A caveat: GitHub exports private keys in PKCS#1 format, which works
+fine to sign requests in nodejs. However, WebCrypto, as used in Cloudflare's worker runtime,
+requires PKCS#8. I had to convert the downloaded key using openssl (see [[https://github.com/gr2m/universal-github-app-jwt#readme][here]])
 before creating the secret in Cloudflare.
 
 [fn:3] An earlier version of this note lamented the need to rotate a personal
-access token every three months. I've since learned about GitHub Apps, [[https://github.com/shoover/shawnhoover.dev/commit/a3735990302fefb61f2a82d2afb34cbe6e123305#diff-e451850c449a4b52253b4ddd4e26e4b990cc11d086b2381e1fa7ea7d0405a296R48][fixed]] the
-hangup, and updated the note.
+access token every three months. I've since learned about GitHub Apps, [[https://github.com/shoover/shawnhoover.dev/commit/a3735990302fefb61f2a82d2afb34cbe6e123305#diff-e451850c449a4b52253b4ddd4e26e4b990cc11d086b2381e1fa7ea7d0405a296R48][updated the worker code]], and updated this note.
  
 [fn:2] But, alas, was not itself authored by email.
 
