@@ -1,0 +1,44 @@
+#+title: Exporting Web Pages to Kindle.app on iOS
+#+date: <2023-11-24 Fri 15:00>
+#+setupfile: org.txt
+
+﻿I don't mind reading 20+ minutes on a reasonable phone display (e.g. 6”
+Retina) /if/ I don't have to swipe-scroll a hundred pages. Of the Safari
+mobile browser export options, two, Books and Kindle, have usable single
+tap paging interfaces. Kindle wins because it reformats text to any
+screen size, whereas Books exports fixed size PDFs with tiny text.
+
+Unfortunately, Kindle 1-step export---despite giving the appearance of
+successfully exporting the document---usually fails by exporting a one
+page document with the following disappointing content:
+
+#+begin_quote
+
+Web Extraction Failed
+
+We were unable to extract the content from the following web page. We
+apologize for any inconvenience.
+
+#+end_quote
+
+There is, however, a multi-step recipe that hasn't failed me yet. I
+write it here in hopes that I will remember and not repeatedly try
+combinations that don't work next time.
+
+1. Activate Reader Mode.
+2. Share | Print.
+3. Share (again, from print preview) | Kindle.
+4. Change PDF options to “Make layout adjustable.”
+
+One major limitation, which may be a show stopper for many: export to
+Kindle is /text only/. Images---other than maybe a single title
+image---are dropped on the floor.
+
+However, brilliantly, 1-step sharing to Kindle reformats PDFs nicely,
+including academic papers. This PDF:
+
+[[file:../assets/images/notes/exporting-web-pages-to-kindle-app-on-ios/image0.jpeg]]
+
+Becomes this text:
+
+[[file:../assets/images/notes/exporting-web-pages-to-kindle-app-on-ios/image1.jpeg]]
