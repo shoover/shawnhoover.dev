@@ -26,7 +26,7 @@ in the email app, the message is processed to orgmode and pushed to a PR. From
 the PR, I can preview the post in the GitHub code browser (.org renders just
 like markdown) or jump over to the staging site, which will be freshly deployed
 a few seconds after the PR is created. If there are any issues, I can edit in
-place using GitHub web (it's unpleasant but possible on a phone). Merging the PR
+place using the GitHub app (web also works, but the web editor is harder to use). Merging the PR
 deploys the post to the main site.
 
 Here's the high level workflow:
