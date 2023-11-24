@@ -23,5 +23,5 @@ down on the spammy product newsletters that get through, all the better.
 Not to bury the lede, but I really like having the option to /post/ via email. I
 miss Posterous. I dig that GitHub supports PR comments via email. I like the
 concept so much that I wrote code to set it up on this static site (though it's
-turning into more of a polyglot playground). This is the inaugural post via
+become somewhat of a polyglot playground). This is the inaugural post via
 email. Details to come.
