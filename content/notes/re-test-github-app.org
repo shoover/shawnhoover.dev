@@ -1,0 +1,21 @@
+#+title: Re: test github app
+#+date: <2023-11-24 Fri 14:55>
+#+setupfile: org.txt
+
+yyy
+
+On Wed, Nov 22, 2023 at 12:48 PM Shawn Hoover
+<[[mailto:shawn.hoover@gmail.com][shawn.hoover@gmail.com]]> wrote:
+
+#+begin_quote
+
+xxx
+
+On Wed, Nov 22, 2023 at 12:40 PM Shawn Hoover
+<[[mailto:shawn.hoover@gmail.com][shawn.hoover@gmail.com]]> wrote:
+
+#+begin_quote
+
+#+end_quote
+
+#+end_quote
