@@ -1,4 +1,4 @@
-;; A static site generator script for the Notes blog.
+;; A static site generator script for the Dev Notes blog.
 ;;
 ;; This is built on the orgmode project system with a mix of static and dynamic
 ;; customization. `notes-publish' configures and builds a project supporting the
@@ -95,7 +95,7 @@ preformatted subtrees from `sitemap-rss-entry'."
 (defun notes-html-preamble (info)
   "<nav>
 <ul><li><a href=\"/\">shawnhoover.dev</a></li>
-<li><a href=\"/notes\">Notes</a></li>
+<li><a href=\"/notes\">Dev Notes</a></li>
 </ul></nav>")
 
 (defun notes-html-postamble (info)
@@ -114,7 +114,7 @@ preformatted subtrees from `sitemap-rss-entry'."
 ;;
 
 (defun notes-publish (dir target)
-  "Publishes my Notes blog from sources in DIR to HTML/RSS in TARGET.
+  "Publishes my Dev Notes blog from sources in DIR to HTML/RSS in TARGET.
 Includes HTML hot reloading if `notes-writing-mode' is non-nil.
 
 Source/target directories are parameterized but could probably be
@@ -124,7 +124,7 @@ hardcoded."
 
   (let* ((dir-exp (expand-file-name dir))
          (org-publish-project-alist
-          `(("Notes"
+          `(("Dev Notes"
              :components ("orgfiles" "script" "rss"))
 
             ;; Generate posts+sitemap HTML
@@ -158,7 +158,7 @@ hardcoded."
 
              :auto-sitemap t
              :sitemap-filename "index.org"
-             :sitemap-title "Notes"
+             :sitemap-title "Dev Notes"
              :sitemap-sort-files anti-chronologically
 
              ;; Customize sitemap generation to include all the properties needed to
@@ -188,7 +188,7 @@ hardcoded."
              :html-link-home "https://shawnhoover.dev/notes"
              :html-link-use-abs-url t
 
-             :rss-title "shawnhoover.dev - Notes"
+             :rss-title "shawnhoover.dev - Dev Notes"
              :rss-image-url "https://shawnhoover.dev/assets/icons/apple-touch-icon.png"
              :section-numbers nil
              :table-of-contents nil)))
@@ -207,7 +207,7 @@ hardcoded."
     (set-language-environment "UTF-8")
 
     (message "Publishing org-mode project: %s" dir-exp)
-    (org-publish-project "Notes" force)))
+    (org-publish-project "Dev Notes" force)))
 
 
 ;;
