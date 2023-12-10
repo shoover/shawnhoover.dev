@@ -1,0 +1,102 @@
+#+title: Viewing listening ports on any platform (that I use regularly)
+#+description: Various commands to replicate the behavior of netstat
+#+date: <2023-12-10 Sun 16:01>
+#+setupfile: org.txt
+
+For much of my career, all I needed to remember to view listening ports on any
+local machine was good, old =netstat -na=. Developing on MacOS and working with
+Linux Docker containers, however, require additional tricks. Here are the tools
+I use to quickly check ports on various platforms.
+
+* Windows: netstat
+#+begin_src bat
+> netstat -na
+
+Active Connections
+
+  Proto  Local Address          Foreign Address        State
+  TCP    0.0.0.0:22             0.0.0.0:0              LISTENING
+  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING
+  ...
+  UDP    0.0.0.0:53             *:*
+  ...
+#+end_src
+
+* Desktop/server Linux: also netstat
+#+begin_src sh
+> netstat -na
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 127.0.0.1:5001          0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:5000            0.0.0.0:*               LISTEN
+udp        0      0 127.0.0.1:323           0.0.0.0:*
+udp6       0      0 ::1:323                 :::*
+...
+#+end_src
+
+* Linux containers: netstat without netstat
+Has netstat?
+
+#+begin_src sh
+>docker run -it ubuntu:latest bash
+root@eedceb5073f6:/# netstat -na
+bash: netstat: command not found
+#+end_src
+
+No. Ugh. And I can never remember the name of the package to install (Shawn,
+it's /=net-tools=/). One day I gave up and found this script from the post
+[[https://staaldraad.github.io/2017/12/20/netstat-without-netstat/][netstat-without-netstat]]. It works. Now I can find it here.
+
+#+begin_src sh
+> awk 'function hextodec(str,ret,n,i,k,c){
+    ret = 0
+    n = length(str)
+    for (i = 1; i <= n; i++) {
+        c = tolower(substr(str, i, 1))
+        k = index("123456789abcdef", c)
+        ret = ret * 16 + k
+    }
+    return ret
+}
+function getIP(str,ret){
+    ret=hextodec(substr(str,index(str,":")-2,2));
+    for (i=5; i>0; i-=2) {
+        ret = ret"."hextodec(substr(str,i,2))
+    }
+    ret = ret":"hextodec(substr(str,index(str,":")+1,4))
+    return ret
+}
+NR > 1 {{if(NR==2)print "\nLocal - Remote";local=getIP($2);
+   remote=getIP($3)}{print local" - "remote}}' /proc/net/tcp
+
+Local - Remote
+127.0.0.1:5001 - 0.0.0.0:0
+0.0.0.0:5000 - 0.0.0.0:0
+#+end_src
+
+* MacOS: lsof wrapper
+I'm also not going to remember =lsof= arguments. I put these functions in
+.zshenv. Call with no args to see all the listening ports. The optional argument
+is a pattern to grep, but I usually end up grepping the full output myself.
+
+#+begin_src sh
+listening_tcp() {
+    if [ $# -eq 0 ]; then
+        sudo lsof -iTCP -sTCP:LISTEN -n -P
+    elif [ $# -eq 1 ]; then
+        sudo lsof -iTCP -sTCP:LISTEN -n -P | grep -i --color $1
+    else
+        echo "Usage: listening [pattern]"
+    fi
+}
+
+listening_udp() {
+    if [ $# -eq 0 ]; then
+        sudo lsof -iUDP -n -P
+    elif [ $# -eq 1 ]; then
+        sudo lsof -iUDP -n -P | grep -i --color $1
+    else
+        echo "Usage: listening [pattern]"
+    fi
+}
+#+end_src
