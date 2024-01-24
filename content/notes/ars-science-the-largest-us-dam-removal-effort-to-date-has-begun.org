@@ -1,0 +1,79 @@
+#+title: Ars Science: The largest US dam-removal effort to date has begun
+#+date: <2024-01-24 Wed 08:02>
+#+setupfile: org.txt
+
+﻿
+
+There's an analogy for software system migration and decommissioning
+here:
+
+#+begin_quote
+Across the US, dams are being removed for various reasons. Many are
+simply old. “They're in rivers beyond their designated life span,” said
+Lucy Andrews, a doctoral student at the University of California,
+Berkeley, who studies water resource management. “They have a high
+potential of failure, particularly when climate change is considered.”
+In other words, these dams weren't designed for today's capricious
+precipitation regimes. Other dams no longer function in the way they
+were designed, said Jonathan Warrick, a coastal geomorphologist with the
+US Geological Survey.
+#+end_quote
+
+--- ﻿[[https://arstechnica.com/science/2024/01/the-largest-us-dam-removal-effort-to-date-has-begun/][Ars]]
+
+These... data processing systems... “weren't designed for today's
+capricious precipitation regimes.” They will require careful,
+intentional planning and execution to upgrade, replace, or shut down.
+
+Like dams, software systems come in many sizes, serve many functions,
+and have complex effects on human and ecological systems around them.
+
+#+begin_quote
+Removal can also reverse ecological damage that, in the western US,
+often harms migratory fish but can also cause problems for other
+sensitive species and ecosystems. In addition, dams “have displaced
+tribal nations from their lands and severed connections to culturally
+important waterways and species,” Andrews said, speaking specifically
+about California. “In these contexts, dam removal can actually be an
+important step toward repair.”
+
+Dams, both large and small, serve various purposes, said Andrews (large
+dams are mostly those taller than 15 meters---roughly the height of a
+four-story building).
+
+“Many dams were constructed in the eastern states for mills and power
+generation,” said Warrick. Most of these dams were relatively small, but
+after World War II, large dams proliferated across the West. Today, US
+dams control floods, generate hydroelectric power, and store water for
+municipal or agricultural use, he explained. “Most dams are built to do
+a little bit of each.” Recreation also factors into cost-benefit
+analyses for existing dams, Warrick said.
+
+#+end_quote
+
+The metaphor breaks down in that dams stockpile and control not only
+water flow, but also sediment flow. In theory, you could turn off most
+software systems and the data they've collected would cease to exist in
+the form in which it was stored. With a dams, the physical sediment must
+be dealt with. The article elaborates on this and other systemic effects
+of dams and the engineering challenges in removing them.
+
+I'll leave a couple more interesting quotes.
+
+#+begin_quote
+When dams are in place, few logs, sticks, and trees flow downstream,
+instead ending up stuck in a reservoir. “Large wood pieces are really
+important in terms of habitat,” Warrick said. Fish and birds along
+riparian corridors prefer complex settings. “Birds like to sit on nooks,
+and fish like to be in little holes, and trees and wood make those
+habitats richer.” When dams are removed, more wood enters the river
+corridor, and ecosystems become better for it.
+#+end_quote
+
+#+begin_quote
+Tribe members, including Thompson, are collecting native seeds and will
+be propagating these plants. “If we do not do native seed replanting, it
+will 100 percent get taken over by invasive species,” she said. “With
+the drawdown, it's such a great opportunity to be able to give these
+native species a chance.”
+#+end_quote
