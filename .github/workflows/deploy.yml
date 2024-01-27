@@ -76,7 +76,7 @@ jobs:
         echo "$emacs_store/bin" >> $GITHUB_PATH
 
     - name: Cache emacs - Miss - Install
-      uses: purcell/setup-emacs@master
+      uses: purcell/setup-emacs@v6.0
       if: steps.cache-emacs.outputs.cache-hit != 'true'
       with:
         version: 29.1
