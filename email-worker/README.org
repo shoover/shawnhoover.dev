@@ -29,6 +29,13 @@ npx wrangler tail --format=pretty
 #+end_src
 
 
+Update Wrangler:
+
+#+begin_src sh
+npm install wrangler@latest
+#+end_src
+
+
 Test posting to the GitHub API:
 
 #+begin_src sh
