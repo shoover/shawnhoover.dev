@@ -3,25 +3,23 @@
 #+setupfile: org.txt
 
 #+BEGIN_QUOTE
-  Expert developers don't necessarily make less mistakes. They probably
-  make more. The difference is they have better safety nets.
+Expert developers don't necessarily make less mistakes. They probably
+make more. The difference is they have better safety nets.
 #+END_QUOTE
 
---- [[https://youtu.be/UNMF5AS4SLg?si=_BZZO9dqoDfrgb2N][Marian
-Petre]] (reproduced from memory)
+--- [[https://youtu.be/UNMF5AS4SLg?si=_BZZO9dqoDfrgb2N][Marian Petre]] (as best I recall after listening to the talk)
 
-I really enjoyed this talk discussing many facets of the skills of
-experts in high performing software teams and how they structure their
-work to promote learning and share knowledge. Consistently
-delivering successful outcomes in complex fields with resource
-constraints requires the application of thought, effort, and creativity
-on every level. This talk highlights great examples of learning from
-errors, pair debugging, testing by breaking things, triage, and taking a
-break. 
+I enjoyed this Strange Loop 2022 talk discussing many facets of the skills of
+experts in high performing software teams and how they structure their work to
+promote learning and share knowledge. Consistently delivering successful
+outcomes in complex fields with resource constraints requires the application of
+thought, effort, and creativity at every turn. This talk highlights great
+examples of learning from errors, pair debugging, testing by breaking things,
+triage by impact, and taking a break.
 
-From now on, I will rationalize compromises left in the code as “fine
-within the Standard Operating Range.”
+From now on, I will rationalize compromises left in the code as “works fine
+within the Standard Operating Range” ;)
 
-Stick around for the Q&A. I got a kick out of the speaker's story being
-brought in to conduct user interviews for a team that couldn't get
-approval to do it with full time staff.
+Stick around for the Q&A. I got a kick out of the speaker's story of being
+brought in to conduct user interviews for a team that couldn't get approval to
+do it with full time staff.
