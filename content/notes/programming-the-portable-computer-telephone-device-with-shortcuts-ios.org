@@ -1,0 +1,75 @@
+#+title: Programming the portable computer telephone device with Shortcuts (iOS)
+#+date: <2024-03-20 Wed 08:41>
+#+setupfile: org.txt
+
+I've known about iOS Shortcuts for a while. It seemed like it should be
+powerful---like a full-blown visual AppleScript on your phone?---but I
+couldn't think of a good use for me. (Also, AppleScript doesn't really
+click for me, either.)
+
+Recently I found myself doing a couple repetitive tasks on my phone and
+thought, Ah! Sure enough, Shortcuts handles them nicely. 
+
+*1. Digging in to the system password manager.*
+
+I have verification codes set up for a few services through my phone.
+Logging in via the phone itself is smart and seamless, but sometimes I
+need to /read/ a verification code on my phone and /type/ it on my PC.
+Getting to the code for a particular saved password consists of
+multiple, very manual, repetitive steps.
+
+I created two shortcuts to fix this. One presents a text input and jumps
+to the password that matches (partial match works). The second presents
+a pick list of the few that I use the most. Very nice. Here's an example
+of the pick version.
+
+[[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image0.jpeg]]
+
+*2. Reminder templates.*
+
+I love making pizza with my kids, but there are... steps... I have to
+remember and keep things moving. Get the dough out of the fridge and
+divide it. Preheat the oven. Clean the Baking Steel later when it's
+cool. Probably more. I used Google Tasks for this and it started feeling
+very repetitive.
+
+I created a shortcut that prompts for a start date and time, prefilled
+with “tomorrow 6pm,” and blasts out all the reminders I need for that
+meal. Slick.
+
+Google Tasks does not support automation, so I use iOS Reminders for
+this. (Complaint: Is there no unified view of Reminders and Calendar?!
+Reminders in and of itself is a great reminder system.)
+
+iOS Reminders's templates feature would also work for this, but there's
+date picker interaction available there. Programming to the rescue.
+Here's the first part of the script:
+
+[[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image1.jpeg]]
+
+And the resulting reminders:
+
+[[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image2.jpeg]]
+
+*To run shortcuts*, you can use the shortcuts app, search for “sho,”
+create a Home Screen widget, or add individual shortcuts to the Home
+Screen. You can also add to the Lock Screen, but individual shortcut
+icons are not distinguishable from each other there. I am trying most of
+the above and will see what sticks.
+
+Search:
+
+[[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image3.jpeg]]
+
+Widget:
+
+[[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image4.jpeg]]
+
+Home Screen shortcut (the one on the right with a pizza on it):
+
+[[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image5.jpeg]]
+
+Overall, Shortcuts is not what I would call a pleasant /programming
+environment/ (on the phone), but it is powerful and the results are
+worthwhile for the right task. Check out all the available automation
+hooks. There are a ton, especially for built in apps.
