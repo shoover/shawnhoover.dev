@@ -42,7 +42,7 @@ this. (Complaint: Is there no unified view of Reminders and Calendar?!
 Reminders in and of itself is a great reminder system.)
 
 iOS Reminders's templates feature would also work for this, but there's
-date picker interaction available there. Programming to the rescue.
+no date picker interaction available there. Programming to the rescue.
 Here's the first part of the script:
 
 [[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image1.jpeg]]
