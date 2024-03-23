@@ -1,0 +1,101 @@
+#+title: Making a progressive web app installable
+#+description: Incantations required to make the install button appear on a few platforms
+#+date: <2024-03-23 Sat 13:20>
+#+setupfile: org.txt
+
+In an experiment to make a static site installable as a standalone app--not a
+bookmark on the homepage that opens in the browser--I had to pull progressive
+web app (PWA) "installability" requirements from a few sources. This post
+collects the steps did.
+
+I mostly referred to [[https://blog.heroku.com/how-to-make-progressive-web-app][How to Make a Progressive Web App From Your Existing
+Website]] and [[https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable][Making PWAs installable]].
+
+** Requirements
+
+*** Add required fields to your manifest
+="icons"=
+
+I read that 192 and 512 pixel icons are required. I included both and
+didn't test that strictly. I generated icons using
+https://favicon.io/favicon-generator/.
+
+="display": "standalone"=
+
+To make a site installable as a standalone app on iOS, this has to be set
+specifically to ="standalone"=.
+
+I ended up with this manifest.json:
+
+#+begin_src js
+{
+    "name": "My Site",
+    "short_name": "Site",
+    "theme_color": "#111",
+    "background_color": "#FFFFF8",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
+#+end_src
+
+*** Set HTTP server headers
+To get the manifest to load on a site example.com protected with identity
+provider auth.example.com, I had to set the following headers:
+
+- ="Access-Control-Allow-Origin": "https://auth.example.com"=
+- ="Content-Security-Policy": "manifest-src 'self' https://auth.example.com/"=
+
+*** Create a service worker  
+I started with the Heroku sample and removed a few things I didn't need. I think
+the main requirements are to respond to =install= and =fetch= events. I picked a
+few pages to cache for offline access.
+
+*** Register the service worker
+I put this in a page template footer to load a separate script to register the
+service worker:
+
+#+begin_src html
+<script src="load-sw.js"></script>
+#+end_src
+
+=load-sw.js=:
+#+begin_src js
+if (!navigator.serviceWorker.controller) {
+    navigator.serviceWorker.register("/sw.js")
+        .then(function(reg) {
+            console.log("Service worker registered for scope: " + reg.scope);
+        });
+}
+#+end_src
+
+*** Set up meta/links
+Tie everything together in the page template head:
+
+#+begin_src html
+<head>
+  ...
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+</head>
+#+end_src
+
+*** Remove sitemap.html from the site
+My site had a =sitemap.html= file that confused Firefox. Firefox /ignored the
+explicitly linked manifest/ and tried to load the HTML file as a JSON manifest,
+which obviously was not valid. Seems like a browser bug, but I dunno. I
+removed the file and moved on.
