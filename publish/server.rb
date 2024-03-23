@@ -20,6 +20,7 @@
 # Requirements:
 #   sudo gem install bundler
 #   bundle install --path ~/.gem
+#   bundle update
 #
 # Reference:
 # - Reference EventMachine Sinatra+WebSocket app: https://stackoverflow.com/a/43873221
