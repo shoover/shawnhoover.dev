@@ -2,25 +2,24 @@
 #+date: <2024-03-20 Wed 08:41>
 #+setupfile: org.txt
 
-I've known about iOS Shortcuts for a while. It seemed like it should be
-powerful---like a full-blown visual AppleScript on your phone?---but I
-couldn't think of a good use for me. (Also, AppleScript doesn't really
-click for me, either.)
+I've known about iOS Shortcuts for a while. It seemed powerful---like a full-blown visual AppleScript on your phone?---but I
+couldn't think of a good use for me. (And, to be honest, AppleScript doesn't really
+click for me.)
 
 Recently I found myself doing a couple repetitive tasks on my phone and
-thought, Ah! Sure enough, Shortcuts handles them nicely. 
+thought, Ah, maybe Shortcuts will handle this. Turns out it does so nicely. 
 
-*1. Digging in to the system password manager.*
+*1. Accessing the system password manager.*
 
 I have verification codes set up for a few services through my phone.
-Logging in via the phone itself is smart and seamless, but sometimes I
+Logging in to the services via the phone itself is nearly automatic, but sometimes I
 need to /read/ a verification code on my phone and /type/ it on my PC.
-Getting to the code for a particular saved password consists of
+Getting to the code for a particular service consists of
 multiple, very manual, repetitive steps.
 
-I created two shortcuts to fix this. One presents a text input and jumps
+I created two shortcuts to access passwords with different levels up front and on the fly intrraction. One method presents a text input and jumps
 to the password that matches (partial match works). The second presents
-a pick list of the few that I use the most. Very nice. Here's an example
+a predefined pick list of the few that I use the most. Here's an example definition 
 of the pick version.
 
 [[file:../assets/images/notes/programming-the-portable-computer-telephone-device-with-shortcuts-ios/image0.jpeg]]
@@ -30,18 +29,18 @@ of the pick version.
 I love making pizza with my kids, but there are... steps... I have to
 remember and keep things moving. Get the dough out of the fridge and
 divide it. Preheat the oven. Clean the Baking Steel later when it's
-cool. Probably more. I used Google Tasks for this and it started feeling
+cool. Etc. For a while I used Google Tasks to remind me, and it started feeling
 very repetitive.
 
 I created a shortcut that prompts for a start date and time, prefilled
-with “tomorrow 6pm,” and blasts out all the reminders I need for that
+with “tomorrow 6pm,” and blasts out all the reminders I need for the
 meal. Slick.
 
 Google Tasks does not support automation, so I use iOS Reminders for
 this. (Complaint: Is there no unified view of Reminders and Calendar?!
-Reminders in and of itself is a great reminder system.)
+Reminders in and of itself is a solid reminder system, though.)
 
-iOS Reminders's templates feature would also work for this, but there's
+iOS Reminders's templates feature would also work for this use case, but there's
 no date picker interaction available there. Programming to the rescue.
 Here's the first part of the script:
 
