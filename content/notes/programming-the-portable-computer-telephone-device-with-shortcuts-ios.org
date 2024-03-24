@@ -17,7 +17,7 @@ need to /read/ a verification code on my phone and /type/ it on my PC.
 Getting to the code for a particular service consists of
 multiple, very manual, repetitive steps.
 
-I created two shortcuts to access passwords with different levels up front and on the fly intrraction. One method presents a text input and jumps
+To quickly access passwords or codes, I created two similar shortcuts requiring slightly different up-front and on-the-fly interaction. One method presents a text input and jumps
 to the password that matches (partial match works). The second presents
 a predefined pick list of the few that I use the most. Here's an example definition 
 of the pick version.
